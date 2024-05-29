@@ -2,7 +2,8 @@ import { z } from 'astro/zod'
 
 import type { StarlightVersionsConfig } from '..'
 
-import { copyDirEntry, ensureDirectory, listDirectory, type DirEntries } from './fs'
+import { copyDirectory, listDirectory } from './fs'
+import { ensureTrailingSlash } from './path'
 import { throwUserError } from './plugin'
 
 export const VersionSchema = z.object({
@@ -13,28 +14,26 @@ export const VersionSchema = z.object({
 })
 
 export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir: URL) {
-  const docsDirEntries = await listDirectory(docsDir)
-  const newVersion = checkForNewVersion(config, docsDirEntries)
+  const newVersion = await checkForNewVersion(config, docsDir)
 
   if (!newVersion) return
 
-  // TODO(HiDeoo)
   const allVersions = new Set(config.versions.map(({ slug }) => slug))
-  const newVersionDir = new URL(newVersion.slug, docsDir)
-  const newVersionDirEntries = docsDirEntries.filter((content) => !allVersions.has(content.name))
 
-  await ensureDirectory(newVersionDir)
+  // TODO(HiDeoo) filter existing versions
+  await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), (entry) => {
+    if (entry.type === 'directory') {
+      return entry.isRoot && allVersions.has(entry.name)
+    }
 
-  for (const entry of newVersionDirEntries) {
-    // TODO(HiDeoo) Add/update slug in frontmatter
-    // TODO(HiDeoo) Refactor to transform links, images, etc. (check obsidian?)
-    await copyDirEntry(entry, docsDir, newVersionDir)
-  }
+    return ''
+  })
 }
 
-function checkForNewVersion(config: StarlightVersionsConfig, docsDirEntries: DirEntries): Version | undefined {
+async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL): Promise<Version | undefined> {
   let newVersion: Version | undefined
 
+  const docsDirEntries = await listDirectory(docsDir)
   const docsDirDirectories = new Set(docsDirEntries.filter((entry) => entry.isDirectory()).map((dirent) => dirent.name))
 
   for (const version of config.versions) {

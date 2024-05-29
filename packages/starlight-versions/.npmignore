@@ -1,3 +1,5 @@
 .prettierignore
+fixtures
+tests
 tsconfig.json
 tsconfig.tsbuildinfo
