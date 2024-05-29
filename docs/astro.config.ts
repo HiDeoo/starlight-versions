@@ -1,9 +1,23 @@
 import starlight from '@astrojs/starlight'
 import { defineConfig } from 'astro/config'
+import starlightVersions from 'starlight-versions'
 
 export default defineConfig({
   integrations: [
     starlight({
+      // TODO(HiDeoo)
+      plugins: [
+        starlightVersions({
+          versions: [
+            {
+              slug: '5.1',
+            },
+            {
+              slug: '5.0',
+            },
+          ],
+        }),
+      ],
       // TODO(HiDeoo)
       customCss: ['./src/styles/custom.css'],
       editLink: {
