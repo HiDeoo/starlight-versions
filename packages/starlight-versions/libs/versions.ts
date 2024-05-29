@@ -4,7 +4,7 @@ import type { StarlightVersionsConfig } from '..'
 
 import { copyDirectory, listDirectory } from './fs'
 import { transformMarkdown } from './markdown'
-import { ensureTrailingSlash } from './path'
+import { ensureTrailingSlash, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getDocSlug } from './starlight'
 
 export const VersionSchema = z.object({
@@ -49,7 +49,7 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
           'Only one version can be created at a time.\nPlease make sure to create the version before creating another one.',
         )
       }
-      newVersion = version
+      newVersion = { ...version, slug: stripLeadingSlash(stripTrailingSlash(version.slug)) }
     }
   }
 
