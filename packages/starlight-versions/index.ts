@@ -2,9 +2,10 @@ import type { StarlightPlugin } from '@astrojs/starlight/types'
 import { z } from 'astro/zod'
 
 import { throwUserError } from './libs/plugin'
-import { ensureNewVersion, VersionSchema } from './libs/versions'
+import { ensureNewVersion, getVersionedSidebar, VersionSchema } from './libs/versions'
 
 // TODO(HiDeoo) docs: aside early prototype
+// TODO(HiDeoo) navigation links
 // TODO(HiDeoo) search
 // TODO(HiDeoo) assets
 // TODO(HiDeoo) i18n
@@ -37,12 +38,22 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
-      async setup({ astroConfig, config: starlightConfig }) {
+      async setup({ astroConfig, config: starlightConfig, updateConfig }) {
         try {
           await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
         } catch (error) {
           throwUserError(
             error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',
+          )
+        }
+
+        try {
+          const versionedSidebar = await getVersionedSidebar(config, starlightConfig.sidebar, astroConfig.srcDir)
+
+          updateConfig({ sidebar: versionedSidebar })
+        } catch (error) {
+          throwUserError(
+            error instanceof Error ? error.message : 'An error occurred while generating versioned sidebars.',
           )
         }
       },

@@ -2,14 +2,6 @@ import path from 'node:path'
 
 import { slug } from 'github-slugger'
 
-export function ensureLeadingSlash(filePath: string): string {
-  if (filePath.startsWith('/')) {
-    return filePath
-  }
-
-  return `/${filePath}`
-}
-
 export function ensureTrailingSlash(filePath: string): string {
   if (filePath.endsWith('/')) {
     return filePath

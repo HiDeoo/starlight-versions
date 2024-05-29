@@ -1,10 +1,13 @@
 import { z } from 'astro/zod'
 
+import type { StarlightSidebarConfig } from './libs/starlight'
+
 export function docsVersionsSchema() {
   return z.object({
-    // TODO(HiDeoo) make sure to handle optional
     sidebar: z.any().optional(),
   })
 }
 
-export type DocsVersionsConfig = z.output<ReturnType<typeof docsVersionsSchema>>
+export interface DocsVersionsConfig {
+  sidebar?: StarlightSidebarConfig
+}

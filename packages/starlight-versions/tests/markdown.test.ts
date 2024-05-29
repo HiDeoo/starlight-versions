@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import { transformMarkdown, type TransformContext } from '../libs/markdown'
 
 const context: TransformContext = {
-  slug: '/test/',
+  slug: 'test',
   version: {
     slug: '2.0.1',
   },
@@ -29,7 +29,7 @@ Test`,
       head:
         - tag: title
           content: Starlight Versions
-      slug: /2.0.1/test/
+      slug: 2.0.1/test
       ---
 
       Test
@@ -56,7 +56,7 @@ Test`,
       head:
         - tag: title
           content: Starlight Versions
-      slug: /2.0.1/
+      slug: 2.0.1
       ---
 
       Test
@@ -71,7 +71,7 @@ title: Test
 head:
   - tag: title
     content: Starlight Versions
-slug: /custom/
+slug: custom
 ---
 
 Test`,
@@ -84,7 +84,7 @@ Test`,
       head:
         - tag: title
           content: Starlight Versions
-      slug: /2.0.1/custom/
+      slug: 2.0.1/custom
       ---
 
       Test
@@ -119,7 +119,7 @@ console.log('Hello, world!')
     expect(result.content).toMatchInlineSnapshot(`
       "---
       title: Test
-      slug: /2.0.1/test/
+      slug: 2.0.1/test
       ---
 
       import { Card, CardGrid } from '@astrojs/starlight/components'

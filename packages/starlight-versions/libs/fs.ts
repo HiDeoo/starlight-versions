@@ -43,6 +43,12 @@ export function writeJSONFile(file: PathLike, data: unknown) {
   return fs.writeFile(file, JSON.stringify(data, null, 2))
 }
 
+export async function readJSONFile<T extends object>(file: PathLike): Promise<T> {
+  const content = await fs.readFile(file, 'utf8')
+
+  return JSON.parse(content) as T
+}
+
 export function ensureDirectory(directory: PathLike) {
   return fs.mkdir(directory, { recursive: true })
 }

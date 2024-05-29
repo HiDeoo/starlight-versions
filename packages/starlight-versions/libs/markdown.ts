@@ -3,6 +3,7 @@ import { remark } from 'remark'
 import remarkFrontmatter from 'remark-frontmatter'
 import type { VFile } from 'vfile'
 
+import { stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version } from './versions'
 
@@ -34,7 +35,9 @@ function handleFrontmatter(tree: Root, file: VFile) {
 
     const frontmatter = parseFrontmatter(node.value)
 
-    frontmatter.slug = `/${file.data.version?.slug}${frontmatter.slug ?? file.data.slug}`
+    frontmatter.slug = stripLeadingSlash(
+      stripTrailingSlash(`${file.data.version?.slug}/${stripTrailingSlash(frontmatter.slug ?? file.data.slug ?? '')}`),
+    )
 
     node.value = getFrontmatterNodeValue(frontmatter)
 
