@@ -39,7 +39,11 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
   }
 }
 
-function ensureDirectory(directory: PathLike) {
+export function writeJSONFile(file: PathLike, data: unknown) {
+  return fs.writeFile(file, JSON.stringify(data, null, 2))
+}
+
+export function ensureDirectory(directory: PathLike) {
   return fs.mkdir(directory, { recursive: true })
 }
 

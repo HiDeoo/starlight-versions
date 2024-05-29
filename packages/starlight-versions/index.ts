@@ -37,11 +37,9 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
-      async setup({ astroConfig }) {
-        const docsDir = new URL('content/docs/', astroConfig.srcDir)
-
+      async setup({ astroConfig, config: starlightConfig }) {
         try {
-          await ensureNewVersion(config, docsDir)
+          await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
         } catch (error) {
           throwUserError(
             error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',

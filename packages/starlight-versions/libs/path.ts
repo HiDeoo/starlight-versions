@@ -18,20 +18,20 @@ export function ensureTrailingSlash(filePath: string): string {
   return `${filePath}/`
 }
 
-export function stripLeadingSlash(path: string) {
-  if (!path.startsWith('/')) {
-    return path
+export function stripLeadingSlash(filePath: string) {
+  if (!filePath.startsWith('/')) {
+    return filePath
   }
 
-  return path.slice(1)
+  return filePath.slice(1)
 }
 
-export function stripTrailingSlash(path: string) {
-  if (!path.endsWith('/')) {
-    return path
+export function stripTrailingSlash(filePath: string) {
+  if (!filePath.endsWith('/')) {
+    return filePath
   }
 
-  return path.slice(0, -1)
+  return filePath.slice(0, -1)
 }
 
 export function slugifyPath(filePath: string): string {

@@ -1,8 +1,10 @@
+import type { StarlightPlugin } from '@astrojs/starlight/types'
 import { z } from 'astro/zod'
 
 import type { StarlightVersionsConfig } from '..'
+import type { DocsVersionsConfig } from '../schema'
 
-import { copyDirectory, listDirectory } from './fs'
+import { copyDirectory, ensureDirectory, listDirectory, writeJSONFile } from './fs'
 import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getDocSlug } from './starlight'
@@ -14,7 +16,12 @@ export const VersionSchema = z.object({
   slug: z.string(),
 })
 
-export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir: URL) {
+export async function ensureNewVersion(
+  config: StarlightVersionsConfig,
+  starlightConfig: StarlightUserConfig,
+  srcDir: URL,
+) {
+  const docsDir = new URL('content/docs/', srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
 
   if (!newVersion) return
@@ -33,6 +40,8 @@ export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir:
 
     return md.content
   })
+
+  await makeVersionConfig(newVersion, starlightConfig, srcDir)
 }
 
 async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL): Promise<Version | undefined> {
@@ -56,4 +65,19 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   return newVersion
 }
 
+async function makeVersionConfig(version: Version, starlightConfig: StarlightUserConfig, srcDir: URL) {
+  const versionsDir = getVersionContentCollectionURL(srcDir)
+
+  await ensureDirectory(versionsDir)
+  await writeJSONFile(new URL(`${version.slug}.json`, getVersionContentCollectionURL(srcDir)), {
+    sidebar: starlightConfig.sidebar,
+  } satisfies DocsVersionsConfig)
+}
+
+function getVersionContentCollectionURL(srcDir: URL) {
+  return new URL('content/versions/', srcDir)
+}
+
 export type Version = z.output<typeof VersionSchema>
+
+type StarlightUserConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']
