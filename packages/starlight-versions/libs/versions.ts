@@ -20,7 +20,6 @@ export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir:
 
   const allVersions = new Set(config.versions.map(({ slug }) => slug))
 
-  // TODO(HiDeoo) filter existing versions
   await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), (entry) => {
     if (entry.type === 'directory') {
       return entry.isRoot && allVersions.has(entry.name)

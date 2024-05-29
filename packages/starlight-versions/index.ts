@@ -10,6 +10,8 @@ import { ensureNewVersion, VersionSchema } from './libs/versions'
 // TODO(HiDeoo) i18n
 // TODO(HiDeoo) i18n fallback
 // TODO(HiDeoo) vsc settings to ignore old versions or something?
+// TODO(HiDeoo) base
+// TODO(HiDeoo) trailing slash?
 
 const starlightVersionsConfigSchema = z.object({
   // TODO(HiDeoo) comment
