@@ -13,7 +13,13 @@
     "test": "vitest",
     "lint": "prettier -c --cache . && eslint . --cache --max-warnings=0"
   },
+  "dependencies": {
+    "remark": "^15.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "yaml": "^2.4.2"
+  },
   "devDependencies": {
+    "@types/mdast": "^4.0.4",
     "fast-glob": "^3.3.2",
     "vitest": "^1.6.0"
   },

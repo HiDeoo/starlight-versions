@@ -80,8 +80,8 @@ describe('copyDirectory', () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
-    const callback: Parameters<typeof copyDirectory>[2] = vi.fn(
-      (entry) => entry.type === 'directory' && entry.name === 'nested',
+    const callback: Parameters<typeof copyDirectory>[2] = vi.fn((entry) =>
+      Promise.resolve(entry.type === 'directory' && entry.name === 'nested'),
     )
 
     await copyDirectory(source, dest, callback)
@@ -108,7 +108,7 @@ describe('copyDirectory', () => {
     const dest = await makeTempDir()
 
     const callback: Parameters<typeof copyDirectory>[2] = vi.fn((entry) =>
-      entry.type === 'file' ? `${entry.name} - updated content` : true,
+      Promise.resolve(entry.type === 'file' ? `${entry.name} - updated content` : true),
     )
 
     await copyDirectory(source, dest, callback)
@@ -128,7 +128,7 @@ describe('copyDirectory', () => {
 })
 
 function copyAllCallback() {
-  return false
+  return Promise.resolve(false)
 }
 
 async function makeTempDir() {

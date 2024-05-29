@@ -24,7 +24,7 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       const source = new URL(ensureTrailingSlash(entry.name), sourceDir)
       const dest = new URL(ensureTrailingSlash(entry.name), destDir)
 
-      const skipDir = callback({ type: 'directory', name: entry.name, isRoot })
+      const skipDir = await callback({ type: 'directory', name: entry.name, isRoot })
       if (skipDir) continue
 
       await ensureDirectory(dest)
@@ -33,7 +33,7 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       const source = new URL(entry.name, sourceDir)
       const content = await fs.readFile(source, 'utf8')
 
-      const updatedContent = callback({ type: 'file', name: entry.name, content })
+      const updatedContent = await callback({ type: 'file', name: entry.name, content })
 
       await fs.writeFile(new URL(entry.name, destDir), `${updatedContent}`)
     }
@@ -46,4 +46,4 @@ function ensureDirectory(directory: PathLike) {
 
 type CopyDirectoryCallback = (
   entry: { type: 'file'; name: string; content: string } | { type: 'directory'; name: string; isRoot: boolean },
-) => string | boolean
+) => Promise<string | boolean>

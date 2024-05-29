@@ -3,6 +3,7 @@ import { z } from 'astro/zod'
 import type { StarlightVersionsConfig } from '..'
 
 import { copyDirectory, listDirectory } from './fs'
+import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash } from './path'
 import { throwUserError } from './plugin'
 
@@ -20,12 +21,14 @@ export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir:
 
   const allVersions = new Set(config.versions.map(({ slug }) => slug))
 
-  await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), (entry) => {
+  await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), async (entry) => {
     if (entry.type === 'directory') {
       return entry.isRoot && allVersions.has(entry.name)
     }
 
-    return ''
+    const md = await transformMarkdown(entry.content)
+
+    return md.content
   })
 }
 
