@@ -2,7 +2,6 @@ import type { PathLike } from 'node:fs'
 import fs from 'node:fs/promises'
 
 import { ensureTrailingSlash } from './path'
-import { throwUserError } from './plugin'
 
 export function listDirectory(directory: URL) {
   return fs.readdir(directory, { withFileTypes: true })
@@ -12,7 +11,7 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
   const dirEntries = await listDirectory(sourceDir)
 
   if (isRoot && dirEntries.length === 0) {
-    throwUserError(
+    throw new Error(
       `Failed to copy the empty directory ('${sourceDir.pathname}') to the destination ('${destDir.pathname}').`,
     )
   }
@@ -33,7 +32,7 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       const source = new URL(entry.name, sourceDir)
       const content = await fs.readFile(source, 'utf8')
 
-      const updatedContent = await callback({ type: 'file', name: entry.name, content })
+      const updatedContent = await callback({ type: 'file', content, url: source })
 
       await fs.writeFile(new URL(entry.name, destDir), `${updatedContent}`)
     }
@@ -45,5 +44,5 @@ function ensureDirectory(directory: PathLike) {
 }
 
 type CopyDirectoryCallback = (
-  entry: { type: 'file'; name: string; content: string } | { type: 'directory'; name: string; isRoot: boolean },
+  entry: { type: 'file'; content: string; url: URL } | { type: 'directory'; name: string; isRoot: boolean },
 ) => Promise<string | boolean>

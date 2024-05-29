@@ -5,7 +5,7 @@ import type { StarlightVersionsConfig } from '..'
 import { copyDirectory, listDirectory } from './fs'
 import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash } from './path'
-import { throwUserError } from './plugin'
+import { getDocSlug } from './starlight'
 
 export const VersionSchema = z.object({
   // TODO(HiDeoo) comment
@@ -26,7 +26,10 @@ export async function ensureNewVersion(config: StarlightVersionsConfig, docsDir:
       return entry.isRoot && allVersions.has(entry.name)
     }
 
-    const md = await transformMarkdown(entry.content)
+    const md = await transformMarkdown(entry.content, {
+      slug: getDocSlug(docsDir, entry.url),
+      version: newVersion,
+    })
 
     return md.content
   })
@@ -41,7 +44,7 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   for (const version of config.versions) {
     if (!docsDirDirectories.has(version.slug)) {
       if (newVersion) {
-        throwUserError(
+        throw new Error(
           // TODO(HiDeoo)
           'Only one version can be created at a time.\nPlease make sure to create the version before creating another one.',
         )

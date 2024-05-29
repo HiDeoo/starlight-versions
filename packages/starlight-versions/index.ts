@@ -12,6 +12,7 @@ import { ensureNewVersion, VersionSchema } from './libs/versions'
 // TODO(HiDeoo) vsc settings to ignore old versions or something?
 // TODO(HiDeoo) base
 // TODO(HiDeoo) trailing slash?
+// TODO(HiDeoo) MDX comment issue when creating a new version
 
 const starlightVersionsConfigSchema = z.object({
   // TODO(HiDeoo) comment
@@ -39,7 +40,13 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
       async setup({ astroConfig }) {
         const docsDir = new URL('content/docs/', astroConfig.srcDir)
 
-        await ensureNewVersion(config, docsDir)
+        try {
+          await ensureNewVersion(config, docsDir)
+        } catch (error) {
+          throwUserError(
+            error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',
+          )
+        }
       },
     },
   }

@@ -62,12 +62,18 @@ importers:
       '@astrojs/starlight':
         specifier: '>=0.23.0'
         version: 0.23.2(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5))
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       remark:
         specifier: ^15.0.1
         version: 15.0.1
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
+      vfile:
+        specifier: ^6.0.1
+        version: 6.0.1
       yaml:
         specifier: ^2.4.2
         version: 2.4.2

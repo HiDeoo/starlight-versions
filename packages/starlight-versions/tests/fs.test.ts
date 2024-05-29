@@ -93,11 +93,27 @@ describe('copyDirectory', () => {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     expect(callback).toHaveBeenCalledTimes(6)
     expect(callback).toHaveBeenNthCalledWith(1, { type: 'directory', name: 'dir', isRoot: true })
-    expect(callback).toHaveBeenNthCalledWith(2, { type: 'file', name: 'hello.mdx', content: expect.any(String) })
-    expect(callback).toHaveBeenNthCalledWith(3, { type: 'file', name: 'index.md', content: expect.any(String) })
+    expect(callback).toHaveBeenNthCalledWith(2, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.mdx$/) }),
+    })
+    expect(callback).toHaveBeenNthCalledWith(3, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+    })
     expect(callback).toHaveBeenNthCalledWith(4, { type: 'directory', name: 'nested', isRoot: false })
-    expect(callback).toHaveBeenNthCalledWith(5, { type: 'file', name: 'hello.md', content: expect.any(String) })
-    expect(callback).toHaveBeenNthCalledWith(6, { type: 'file', name: 'index.md', content: expect.any(String) })
+    expect(callback).toHaveBeenNthCalledWith(5, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
+    })
+    expect(callback).toHaveBeenNthCalledWith(6, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+    })
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
     await fs.rm(dest, { recursive: true })
@@ -108,7 +124,7 @@ describe('copyDirectory', () => {
     const dest = await makeTempDir()
 
     const callback: Parameters<typeof copyDirectory>[2] = vi.fn((entry) =>
-      Promise.resolve(entry.type === 'file' ? `${entry.name} - updated content` : true),
+      Promise.resolve(entry.type === 'file' ? 'updated content' : true),
     )
 
     await copyDirectory(source, dest, callback)
@@ -116,12 +132,20 @@ describe('copyDirectory', () => {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     expect(callback).toHaveBeenCalledTimes(3)
     expect(callback).toHaveBeenNthCalledWith(1, { type: 'directory', name: 'dir', isRoot: true })
-    expect(callback).toHaveBeenNthCalledWith(2, { type: 'file', name: 'hello.md', content: expect.any(String) })
-    expect(callback).toHaveBeenNthCalledWith(3, { type: 'file', name: 'index.md', content: expect.any(String) })
+    expect(callback).toHaveBeenNthCalledWith(2, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
+    })
+    expect(callback).toHaveBeenNthCalledWith(3, {
+      type: 'file',
+      content: expect.any(String),
+      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+    })
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
-    expect(await fs.readFile(new URL('hello.md', dest), 'utf8')).toEqual('hello.md - updated content')
-    expect(await fs.readFile(new URL('index.md', dest), 'utf8')).toEqual('index.md - updated content')
+    expect(await fs.readFile(new URL('hello.md', dest), 'utf8')).toEqual('updated content')
+    expect(await fs.readFile(new URL('index.md', dest), 'utf8')).toEqual('updated content')
 
     await fs.rm(dest, { recursive: true })
   })

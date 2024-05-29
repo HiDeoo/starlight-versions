@@ -1,13 +1,18 @@
 import type { Root } from 'mdast'
 import { remark } from 'remark'
 import remarkFrontmatter from 'remark-frontmatter'
+import type { VFile } from 'vfile'
 
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
+import type { Version } from './versions'
 
 const processor = remark().use(remarkFrontmatter).use(remarkStarlightVersions)
 
-export async function transformMarkdown(markdown: string) {
-  const file = await processor.process({ value: markdown })
+export async function transformMarkdown(markdown: string, context: TransformContext) {
+  const file = await processor.process({
+    data: { ...context },
+    value: markdown,
+  })
 
   return {
     content: String(file),
@@ -15,12 +20,12 @@ export async function transformMarkdown(markdown: string) {
 }
 
 export function remarkStarlightVersions() {
-  return function transformer(tree: Root) {
-    handleFrontmatter(tree)
+  return function transformer(tree: Root, file: VFile) {
+    handleFrontmatter(tree, file)
   }
 }
 
-function handleFrontmatter(tree: Root) {
+function handleFrontmatter(tree: Root, file: VFile) {
   // The frontmatter is always at the root of the tree.
   for (const node of tree.children) {
     if (node.type !== 'yaml') {
@@ -29,11 +34,19 @@ function handleFrontmatter(tree: Root) {
 
     const frontmatter = parseFrontmatter(node.value)
 
-    // TODO(HiDeoo) existing slug
-    frontmatter.slug = '// TODO(HiDeoo)'
+    frontmatter.slug = `/${file.data.version?.slug}${frontmatter.slug ?? file.data.slug}`
 
     node.value = getFrontmatterNodeValue(frontmatter)
 
     break
   }
+}
+
+export interface TransformContext {
+  slug: string
+  version: Version
+}
+
+declare module 'vfile' {
+  interface DataMap extends TransformContext {}
 }
