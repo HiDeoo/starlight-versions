@@ -17,6 +17,7 @@ import { vitePluginStarlightVersions } from './libs/vite'
 // TODO(HiDeoo) MDX comment issue when creating a new version
 
 const starlightVersionsConfigSchema = z.object({
+  // TODO(HiDeoo) current version options (label?)
   // TODO(HiDeoo) comment
   versions: z.array(VersionSchema).refine((value) => value.length > 0, {
     // TODO(HiDeoo)

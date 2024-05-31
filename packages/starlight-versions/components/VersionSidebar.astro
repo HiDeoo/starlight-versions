@@ -1,10 +1,15 @@
 ---
 import Default from '@astrojs/starlight/components/Sidebar.astro'
 import type { Props } from '@astrojs/starlight/props'
+import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
-import { getVersionSidebar } from '../libs/versions'
+import { getPageSlug } from '../libs/starlight'
+import { getVersionFromSlug, getVersionSidebar } from '../libs/versions'
 
-// TODO(HiDeoo) Figure out version and render the proper sidebar
+const sidebar = getVersionSidebar(
+  getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astro.url)),
+  Astro.props.sidebar,
+)
 ---
 
-<Default {...Astro.props} sidebar={getVersionSidebar({ slug: 'latest' }, Astro.props.sidebar)}><slot /></Default>
+<Default {...Astro.props} {sidebar}><slot /></Default>

@@ -15,6 +15,8 @@ import {
   type StarlightSidebar,
 } from './starlight'
 
+const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionSidebarGroupLabel')
+
 export const VersionSchema = z.object({
   // TODO(HiDeoo) comment
   label: z.string().optional(),
@@ -57,8 +59,7 @@ export async function getVersionedSidebar(
 ): Promise<NonNullable<StarlightSidebarUserConfig>> {
   const sidebar = [
     {
-      // TODO(HiDeoo) use a symbol
-      label: 'latest',
+      label: currentVersionSidebarGroupLabel.toString(),
       // TODO(HiDeoo) undefined (we may need to autogen everything and filter in the override component)
       items: currentSidebar ?? [],
     },
@@ -72,14 +73,24 @@ export async function getVersionedSidebar(
   return sidebar
 }
 
-export function getVersionSidebar(version: Version, sidebar: StarlightSidebar): StarlightSidebar {
-  const sidebarVersionGroup = sidebar.find((item) => item.label === version.slug)
+// A version is considered as the current version if it's undefined.
+export function getVersionSidebar(version: Version | undefined, sidebar: StarlightSidebar): StarlightSidebar {
+  const sidebarVersionGroup = sidebar.find(
+    (item) => item.label === (version?.slug ?? currentVersionSidebarGroupLabel.toString()),
+  )
 
   if (!sidebarVersionGroup || !('entries' in sidebarVersionGroup)) {
-    throwPluginError(`Failed to find a sidebar group for the version '${version.slug}'.`)
+    throwPluginError(
+      `Failed to find a sidebar group for the ${version ? `version '${version.slug}'` : 'current version'}.`,
+    )
   }
 
   return sidebarVersionGroup.entries
+}
+
+// An undefined version is valid and represents the current version.
+export function getVersionFromSlug(config: StarlightVersionsConfig, slug: string): Version | undefined {
+  return config.versions.find((version) => slug.startsWith(`${version.slug}/`) || slug === version.slug)
 }
 
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {

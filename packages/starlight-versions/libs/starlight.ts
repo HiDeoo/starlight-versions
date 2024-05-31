@@ -58,6 +58,10 @@ export function addPrefixToSidebarConfig(
   })
 }
 
+export function getPageSlug(url: URL) {
+  return url.pathname.replace(/^\//, '').replace(/\/$/, '')
+}
+
 function isAbsoluteSidebarLinkItem(link: string) {
   return absoluteLinkRegex.test(link)
 }
