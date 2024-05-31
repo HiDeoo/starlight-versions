@@ -99,7 +99,6 @@ export function getVersionURL(config: StarlightVersionsConfig, url: URL, version
   const versionURL = new URL(url)
   const versionSlug = version?.slug ?? ''
 
-  // TODO(HiDeoo)
   const base = stripTrailingSlash(import.meta.env.BASE_URL)
   const hasBase = versionURL.pathname.startsWith(base)
 
