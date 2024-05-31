@@ -1,6 +1,7 @@
 import path from 'node:path'
 import url from 'node:url'
 
+import type { Props } from '@astrojs/starlight/props'
 import type { docsSchema } from '@astrojs/starlight/schema'
 import type { StarlightPlugin } from '@astrojs/starlight/types'
 import type { z } from 'astro/zod'
@@ -27,8 +28,8 @@ export function getDocSlug(docsDir: URL, doc: URL) {
 
 export function addPrefixToSidebarConfig(
   prefix: string,
-  sidebar: NonNullable<StarlightSidebarConfig>,
-): NonNullable<StarlightSidebarConfig> {
+  sidebar: NonNullable<StarlightSidebarUserConfig>,
+): NonNullable<StarlightSidebarUserConfig> {
   return sidebar.map((item) => {
     if ('items' in item) {
       return {
@@ -65,5 +66,7 @@ type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> &
   slug?: string
 }
 
-export type StarlighConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']
-export type StarlightSidebarConfig = StarlighConfig['sidebar']
+export type StarlightUserConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']
+export type StarlightSidebarUserConfig = StarlightUserConfig['sidebar']
+
+export type StarlightSidebar = Props['sidebar']

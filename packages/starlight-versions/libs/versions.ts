@@ -6,7 +6,14 @@ import type { DocsVersionsConfig } from '../schema'
 import { copyDirectory, ensureDirectory, listDirectory, readJSONFile, writeJSONFile } from './fs'
 import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash, stripLeadingSlash, stripTrailingSlash } from './path'
-import { getDocSlug, type StarlightSidebarConfig, type StarlighConfig, addPrefixToSidebarConfig } from './starlight'
+import { throwPluginError } from './plugin'
+import {
+  getDocSlug,
+  type StarlightSidebarUserConfig,
+  type StarlightUserConfig,
+  addPrefixToSidebarConfig,
+  type StarlightSidebar,
+} from './starlight'
 
 export const VersionSchema = z.object({
   // TODO(HiDeoo) comment
@@ -15,7 +22,11 @@ export const VersionSchema = z.object({
   slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
 })
 
-export async function ensureNewVersion(config: StarlightVersionsConfig, starlightConfig: StarlighConfig, srcDir: URL) {
+export async function ensureNewVersion(
+  config: StarlightVersionsConfig,
+  starlightConfig: StarlightUserConfig,
+  srcDir: URL,
+) {
   const docsDir = new URL('content/docs/', srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
 
@@ -41,9 +52,9 @@ export async function ensureNewVersion(config: StarlightVersionsConfig, starligh
 
 export async function getVersionedSidebar(
   config: StarlightVersionsConfig,
-  currentSidebar: StarlightSidebarConfig,
+  currentSidebar: StarlightSidebarUserConfig,
   srcDir: URL,
-): Promise<NonNullable<StarlightSidebarConfig>> {
+): Promise<NonNullable<StarlightSidebarUserConfig>> {
   const sidebar = [
     {
       // TODO(HiDeoo) use a symbol
@@ -59,6 +70,16 @@ export async function getVersionedSidebar(
   }
 
   return sidebar
+}
+
+export function getVersionSidebar(version: Version, sidebar: StarlightSidebar): StarlightSidebar {
+  const sidebarVersionGroup = sidebar.find((item) => item.label === version.slug)
+
+  if (!sidebarVersionGroup || !('entries' in sidebarVersionGroup)) {
+    throwPluginError(`Failed to find a sidebar group for the version '${version.slug}'.`)
+  }
+
+  return sidebarVersionGroup.entries
 }
 
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {
@@ -100,7 +121,7 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   return newVersion
 }
 
-async function makeVersionConfig(version: Version, starlightConfig: StarlighConfig, srcDir: URL) {
+async function makeVersionConfig(version: Version, starlightConfig: StarlightUserConfig, srcDir: URL) {
   const versionsDir = getVersionContentCollectionURL(srcDir)
 
   await ensureDirectory(versionsDir)

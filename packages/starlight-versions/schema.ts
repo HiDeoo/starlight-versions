@@ -1,6 +1,6 @@
 import { z } from 'astro/zod'
 
-import type { StarlightSidebarConfig } from './libs/starlight'
+import type { StarlightSidebarUserConfig } from './libs/starlight'
 
 export function docsVersionsSchema() {
   return z.object({
@@ -9,5 +9,5 @@ export function docsVersionsSchema() {
 }
 
 export interface DocsVersionsConfig {
-  sidebar?: StarlightSidebarConfig
+  sidebar?: StarlightSidebarUserConfig
 }

@@ -9,6 +9,8 @@
     ".": "./index.ts",
     "./schema": "./schema.ts",
     "./components/VersionSelect.astro": "./components/VersionSelect.astro",
+    "./components/VersionSidebar.astro": "./components/VersionSidebar.astro",
+    "./overrides/Sidebar.astro": "./overrides/Sidebar.astro",
     "./overrides/ThemeSelect.astro": "./overrides/ThemeSelect.astro",
     "./package.json": "./package.json"
   },

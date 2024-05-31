@@ -1,7 +1,7 @@
 import type { StarlightPlugin } from '@astrojs/starlight/types'
 import { z } from 'astro/zod'
 
-import { overrideComponent, throwUserError } from './libs/plugin'
+import { overrideComponents, throwPluginError } from './libs/plugin'
 import { ensureNewVersion, getVersionedSidebar, VersionSchema } from './libs/versions'
 import { vitePluginStarlightVersions } from './libs/vite'
 
@@ -29,7 +29,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   const parsedConfig = starlightVersionsConfigSchema.safeParse(userConfig)
 
   if (!parsedConfig.success) {
-    throwUserError(
+    throwPluginError(
       `The provided plugin configuration is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`,
     )
   }
@@ -44,7 +44,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
           // TODO(HiDeoo) logs/cli/feedback
           await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
         } catch (error) {
-          throwUserError(
+          throwPluginError(
             error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',
           )
         }
@@ -53,15 +53,18 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
           const versionedSidebar = await getVersionedSidebar(config, starlightConfig.sidebar, astroConfig.srcDir)
 
           updateConfig({
-            components: {
-              ...starlightConfig.components,
-              ...overrideComponent(starlightConfig.components, 'ThemeSelect', 'VersionSelect', logger),
-              // TODO(HiDeoo) mobile dropdown
-            },
+            components: overrideComponents(
+              starlightConfig,
+              [
+                { name: 'ThemeSelect', fallback: 'VersionSelect' },
+                { name: 'Sidebar', fallback: 'VersionSidebar' },
+              ],
+              logger,
+            ),
             sidebar: versionedSidebar,
           })
         } catch (error) {
-          throwUserError(
+          throwPluginError(
             error instanceof Error ? error.message : 'An error occurred while generating versioned sidebars.',
           )
         }
