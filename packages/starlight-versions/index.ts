@@ -14,10 +14,18 @@ import { vitePluginStarlightVersions } from './libs/vite'
 // TODO(HiDeoo) vsc settings to ignore old versions or something?
 // TODO(HiDeoo) base
 // TODO(HiDeoo) trailing slash?
-// TODO(HiDeoo) MDX comment issue when creating a new version
+// TODO(HiDeoo) MDX comment issue when creating a new version (maybe we just need to have a mdx processor?)
+// TODO(HiDeoo) outdated version notice
+// TODO(HiDeoo) option to redirect to homepage when selecting a version (redirect/behavior)
 
 const starlightVersionsConfigSchema = z.object({
-  // TODO(HiDeoo) current version options (label?)
+  // TODO(HiDeoo) comment
+  current: z
+    .object({
+      // TODO(HiDeoo) comment
+      label: z.string().default('Latest'),
+    })
+    .default({}),
   // TODO(HiDeoo) comment
   versions: z.array(VersionSchema).refine((value) => value.length > 0, {
     // TODO(HiDeoo)
