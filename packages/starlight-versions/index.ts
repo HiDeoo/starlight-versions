@@ -1,8 +1,9 @@
 import type { StarlightPlugin } from '@astrojs/starlight/types'
 import { z } from 'astro/zod'
 
-import { throwUserError } from './libs/plugin'
+import { overrideComponent, throwUserError } from './libs/plugin'
 import { ensureNewVersion, getVersionedSidebar, VersionSchema } from './libs/versions'
+import { vitePluginStarlightVersions } from './libs/vite'
 
 // TODO(HiDeoo) docs: aside early prototype
 // TODO(HiDeoo) navigation links
@@ -38,8 +39,9 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
-      async setup({ astroConfig, config: starlightConfig, updateConfig }) {
+      async setup({ addIntegration, astroConfig, config: starlightConfig, logger, updateConfig }) {
         try {
+          // TODO(HiDeoo) logs/cli/feedback
           await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
         } catch (error) {
           throwUserError(
@@ -50,12 +52,28 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
         try {
           const versionedSidebar = await getVersionedSidebar(config, starlightConfig.sidebar, astroConfig.srcDir)
 
-          updateConfig({ sidebar: versionedSidebar })
+          updateConfig({
+            components: {
+              ...starlightConfig.components,
+              ...overrideComponent(starlightConfig.components, 'ThemeSelect', 'VersionSelect', logger),
+              // TODO(HiDeoo) mobile dropdown
+            },
+            sidebar: versionedSidebar,
+          })
         } catch (error) {
           throwUserError(
             error instanceof Error ? error.message : 'An error occurred while generating versioned sidebars.',
           )
         }
+
+        addIntegration({
+          name: 'starlight-versions-integration',
+          hooks: {
+            'astro:config:setup': ({ updateConfig }) => {
+              updateConfig({ vite: { plugins: [vitePluginStarlightVersions(config)] } })
+            },
+          },
+        })
       },
     },
   }
