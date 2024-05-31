@@ -52,134 +52,277 @@ describe('getVersionFromSlug', () => {
 })
 
 describe('getVersionURL', () => {
-  const version = createTestVersion('3.0')
-  const config = StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('2.0'), version] })
-
-  describe("with `build.output: 'directory'`", () => {
-    test('does nothing on the index route if the requested version is the current one', () => {
-      const url = new URL('https://example.com/')
-      expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+  describe("with `redirect: 'same-page'`", () => {
+    const version = createTestVersion('3.0', 'root')
+    const config = StarlightVersionsConfigSchema.parse({
+      current: { redirect: 'root' },
+      versions: [createTestVersion('2.0', 'root'), version],
     })
 
-    test('does nothing if the version and requested version are the current one', () => {
-      const url = new URL('https://example.com/guides/example/')
-      expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+    describe("with `build.output: 'directory'`", () => {
+      // TODO(HiDeoo)
+      test('does nothing on the index route if the requested version is the current one', () => {
+        const url = new URL('https://example.com/')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
+
+      test('changes to the root URL if the version and requested version are the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example/'), undefined).href).toBe(
+          'https://example.com/',
+        )
+      })
+
+      test('changes to the root URL if the version and requested version are the same', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example/'), version).href).toBe(
+          'https://example.com/3.0/',
+        )
+      })
+
+      test('changes version to the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example/'), undefined).href).toBe(
+          'https://example.com/',
+        )
+      })
+
+      test('changes version to the current one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/'), undefined).href).toBe('https://example.com/')
+      })
+
+      test('changes version to the requested one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example/'), version).href).toBe(
+          'https://example.com/3.0/',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example/'), version).href).toBe(
+          'https://example.com/3.0/',
+        )
+      })
+
+      test('changes version to the requested one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com'), version).href).toBe('https://example.com/3.0/')
+        expect(getVersionURL(config, new URL('https://example.com/2.0/'), version).href).toBe(
+          'https://example.com/3.0/',
+        )
+      })
+
+      test('preserves the base when changing version', () => {
+        vi.stubEnv('BASE_URL', '/test')
+
+        expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example/'), undefined).href).toBe(
+          'https://example.com/test/',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/test/guides/example/'), version).href).toBe(
+          'https://example.com/test/3.0/',
+        )
+
+        vi.unstubAllEnvs()
+      })
     })
 
-    test('does nothing if the version and requested version are the same', () => {
-      const url = new URL('https://example.com/3.0/guides/example/')
-      expect(getVersionURL(config, url, version).href).toBe(url.href)
-    })
+    describe("with `build.output: 'file'`", () => {
+      test('does nothing on the index route if the requested version is the current one', () => {
+        const url = new URL('https://example.com/index.html')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
 
-    test('does nothing if the version and requested version are the same for the index route', () => {
-      const url = new URL('https://example.com/3.0/')
-      expect(getVersionURL(config, url, version).href).toBe(url.href)
-    })
+      test('changes to the root URL if the version and requested version are the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example.html'), undefined).href).toBe(
+          'https://example.com/index.html',
+        )
+      })
 
-    test('changes version to the current one', () => {
-      expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example/'), undefined).href).toBe(
-        'https://example.com/guides/example/',
-      )
-    })
+      test('changes to the root URL if the version and requested version are the same', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+      })
 
-    test('changes version to the current one for the index route', () => {
-      expect(getVersionURL(config, new URL('https://example.com/3.0/'), undefined).href).toBe('https://example.com/')
-    })
+      test('does nothing if the version and requested version are the same for the index route', () => {
+        const url = new URL('https://example.com/3.0.html')
+        expect(getVersionURL(config, url, version).href).toBe(url.href)
+      })
 
-    test('changes version to the requested one', () => {
-      expect(getVersionURL(config, new URL('https://example.com/guides/example/'), version).href).toBe(
-        'https://example.com/3.0/guides/example/',
-      )
-      expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example/'), version).href).toBe(
-        'https://example.com/3.0/guides/example/',
-      )
-    })
+      test('changes version to the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example.html'), undefined).href).toBe(
+          'https://example.com/index.html',
+        )
+      })
 
-    test('changes version to the requested one for the index route', () => {
-      expect(getVersionURL(config, new URL('https://example.com'), version).href).toBe('https://example.com/3.0/')
-      expect(getVersionURL(config, new URL('https://example.com/2.0/'), version).href).toBe('https://example.com/3.0/')
-    })
+      test('changes version to the current one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0.html'), undefined).href).toBe(
+          'https://example.com/index.html',
+        )
+      })
 
-    test('preserves the base when changing version', () => {
-      vi.stubEnv('BASE_URL', '/test')
+      test('changes version to the requested one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+      })
 
-      expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example/'), undefined).href).toBe(
-        'https://example.com/test/guides/example/',
-      )
-      expect(getVersionURL(config, new URL('https://example.com/test/guides/example/'), version).href).toBe(
-        'https://example.com/test/3.0/guides/example/',
-      )
+      test('changes version to the requested one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/index.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+      })
 
-      vi.unstubAllEnvs()
+      test('preserves the base when changing version', () => {
+        vi.stubEnv('BASE_URL', '/test')
+
+        expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example.html'), undefined).href).toBe(
+          'https://example.com/test/index.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/test/guides/example.html'), version).href).toBe(
+          'https://example.com/test/3.0.html',
+        )
+
+        vi.unstubAllEnvs()
+      })
     })
   })
 
-  describe("with `build.output: 'file'`", () => {
-    test('does nothing on the index route if the requested version is the current one', () => {
-      const url = new URL('https://example.com/index.html')
-      expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+  describe("with `redirect: 'same-page'`", () => {
+    const version = createTestVersion('3.0', 'same-page')
+    const config = StarlightVersionsConfigSchema.parse({
+      current: { redirect: 'same-page' },
+      versions: [createTestVersion('2.0', 'same-page'), version],
     })
 
-    test('does nothing if the version and requested version are the current one', () => {
-      const url = new URL('https://example.com/guides/example.html')
-      expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+    describe("with `build.output: 'directory'`", () => {
+      test('does nothing on the index route if the requested version is the current one', () => {
+        const url = new URL('https://example.com/')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
+
+      test('does nothing if the version and requested version are the current one', () => {
+        const url = new URL('https://example.com/guides/example/')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
+
+      test('does nothing if the version and requested version are the same', () => {
+        const url = new URL('https://example.com/3.0/guides/example/')
+        expect(getVersionURL(config, url, version).href).toBe(url.href)
+      })
+
+      test('does nothing if the version and requested version are the same for the index route', () => {
+        const url = new URL('https://example.com/3.0/')
+        expect(getVersionURL(config, url, version).href).toBe(url.href)
+      })
+
+      test('changes version to the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example/'), undefined).href).toBe(
+          'https://example.com/guides/example/',
+        )
+      })
+
+      test('changes version to the current one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/'), undefined).href).toBe('https://example.com/')
+      })
+
+      test('changes version to the requested one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example/'), version).href).toBe(
+          'https://example.com/3.0/guides/example/',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example/'), version).href).toBe(
+          'https://example.com/3.0/guides/example/',
+        )
+      })
+
+      test('changes version to the requested one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com'), version).href).toBe('https://example.com/3.0/')
+        expect(getVersionURL(config, new URL('https://example.com/2.0/'), version).href).toBe(
+          'https://example.com/3.0/',
+        )
+      })
+
+      test('preserves the base when changing version', () => {
+        vi.stubEnv('BASE_URL', '/test')
+
+        expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example/'), undefined).href).toBe(
+          'https://example.com/test/guides/example/',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/test/guides/example/'), version).href).toBe(
+          'https://example.com/test/3.0/guides/example/',
+        )
+
+        vi.unstubAllEnvs()
+      })
     })
 
-    test('does nothing if the version and requested version are the same', () => {
-      const url = new URL('https://example.com/3.0/guides/example.html')
-      expect(getVersionURL(config, url, version).href).toBe(url.href)
-    })
+    describe("with `build.output: 'file'`", () => {
+      test('does nothing on the index route if the requested version is the current one', () => {
+        const url = new URL('https://example.com/index.html')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
 
-    test('does nothing if the version and requested version are the same for the index route', () => {
-      const url = new URL('https://example.com/3.0.html')
-      expect(getVersionURL(config, url, version).href).toBe(url.href)
-    })
+      test('does nothing if the version and requested version are the current one', () => {
+        const url = new URL('https://example.com/guides/example.html')
+        expect(getVersionURL(config, url, undefined).href).toBe(url.href)
+      })
 
-    test('changes version to the current one', () => {
-      const url = new URL('https://example.com/3.0/guides/example.html')
-      expect(getVersionURL(config, url, undefined).href).toBe('https://example.com/guides/example.html')
-    })
+      test('does nothing if the version and requested version are the same', () => {
+        const url = new URL('https://example.com/3.0/guides/example.html')
+        expect(getVersionURL(config, url, version).href).toBe(url.href)
+      })
 
-    test('changes version to the current one for the index route', () => {
-      const url = new URL('https://example.com/3.0.html')
-      expect(getVersionURL(config, url, undefined).href).toBe('https://example.com/index.html')
-    })
+      test('does nothing if the version and requested version are the same for the index route', () => {
+        const url = new URL('https://example.com/3.0.html')
+        expect(getVersionURL(config, url, version).href).toBe(url.href)
+      })
 
-    test('changes version to the requested one', () => {
-      expect(getVersionURL(config, new URL('https://example.com/guides/example.html'), version).href).toBe(
-        'https://example.com/3.0/guides/example.html',
-      )
-      expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example.html'), version).href).toBe(
-        'https://example.com/3.0/guides/example.html',
-      )
-    })
+      test('changes version to the current one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0/guides/example.html'), undefined).href).toBe(
+          'https://example.com/guides/example.html',
+        )
+      })
 
-    test('changes version to the requested one for the index route', () => {
-      expect(getVersionURL(config, new URL('https://example.com/index.html'), version).href).toBe(
-        'https://example.com/3.0.html',
-      )
-      expect(getVersionURL(config, new URL('https://example.com/2.0.html'), version).href).toBe(
-        'https://example.com/3.0.html',
-      )
-    })
+      test('changes version to the current one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/3.0.html'), undefined).href).toBe(
+          'https://example.com/index.html',
+        )
+      })
 
-    test('preserves the base when changing version', () => {
-      vi.stubEnv('BASE_URL', '/test')
+      test('changes version to the requested one', () => {
+        expect(getVersionURL(config, new URL('https://example.com/guides/example.html'), version).href).toBe(
+          'https://example.com/3.0/guides/example.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0/guides/example.html'), version).href).toBe(
+          'https://example.com/3.0/guides/example.html',
+        )
+      })
 
-      expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example.html'), undefined).href).toBe(
-        'https://example.com/test/guides/example.html',
-      )
-      expect(getVersionURL(config, new URL('https://example.com/test/guides/example.html'), version).href).toBe(
-        'https://example.com/test/3.0/guides/example.html',
-      )
+      test('changes version to the requested one for the index route', () => {
+        expect(getVersionURL(config, new URL('https://example.com/index.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/2.0.html'), version).href).toBe(
+          'https://example.com/3.0.html',
+        )
+      })
 
-      vi.unstubAllEnvs()
+      test('preserves the base when changing version', () => {
+        vi.stubEnv('BASE_URL', '/test')
+
+        expect(getVersionURL(config, new URL('https://example.com/test/3.0/guides/example.html'), undefined).href).toBe(
+          'https://example.com/test/guides/example.html',
+        )
+        expect(getVersionURL(config, new URL('https://example.com/test/guides/example.html'), version).href).toBe(
+          'https://example.com/test/3.0/guides/example.html',
+        )
+
+        vi.unstubAllEnvs()
+      })
     })
   })
 
   // TODO(HiDeoo) i18n tests
 })
 
-function createTestVersion(slug: string): Version {
-  return { slug, redirect: 'same-page' }
+function createTestVersion(slug: string, redirect: Version['redirect'] = 'same-page'): Version {
+  return { slug, redirect }
 }

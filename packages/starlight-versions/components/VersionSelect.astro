@@ -6,9 +6,6 @@ import { getPageSlug } from '../libs/starlight'
 import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
 const pageVersion = getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astro.url))
-
-// TODO(HiDeoo) trailing slash?
-// TODO(HiDeoo) redirect behavior
 ---
 
 <starlight-version-select>

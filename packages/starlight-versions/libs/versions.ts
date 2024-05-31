@@ -19,7 +19,7 @@ const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionS
 
 export const VersionBaseSchema = z.object({
   // TODO(HiDeoo) comment
-  redirect: z.union([z.literal('home'), z.literal('same-page')]).default('same-page'),
+  redirect: z.union([z.literal('root'), z.literal('same-page')]).default('same-page'),
 })
 
 export const VersionSchema = z
@@ -98,6 +98,7 @@ export function getVersionSidebar(version: Version | undefined, sidebar: Starlig
 export function getVersionURL(config: StarlightVersionsConfig, url: URL, version: Version | undefined): URL {
   const versionURL = new URL(url)
   const versionSlug = version?.slug ?? ''
+  const versionRedirect = version?.redirect ?? config.current.redirect
 
   const base = stripTrailingSlash(import.meta.env.BASE_URL)
   const hasBase = versionURL.pathname.startsWith(base)
@@ -106,6 +107,8 @@ export function getVersionURL(config: StarlightVersionsConfig, url: URL, version
     versionURL.pathname = versionURL.pathname.replace(base, '')
   }
 
+  const isHTML = getExtension(versionURL.pathname) === '.html'
+
   const [, baseSegment] = versionURL.pathname.split('/')
 
   const isRootHTML = baseSegment && getExtension(baseSegment) === '.html'
@@ -113,15 +116,29 @@ export function getVersionURL(config: StarlightVersionsConfig, url: URL, version
 
   if (baseSlug && baseSlug in config.versionsBySlug) {
     if (versionSlug) {
-      versionURL.pathname = versionURL.pathname.replace(baseSlug, versionSlug)
+      versionURL.pathname =
+        versionRedirect === 'same-page'
+          ? versionURL.pathname.replace(baseSlug, versionSlug)
+          : isHTML
+            ? `${versionSlug}.html`
+            : `${versionSlug}/`
     } else if (isRootHTML) {
       versionURL.pathname = '/index.html'
     } else {
-      versionURL.pathname = versionURL.pathname.replace(`/${baseSlug}`, '')
+      versionURL.pathname =
+        versionRedirect === 'same-page' ? versionURL.pathname.replace(`/${baseSlug}`, '') : isHTML ? '/index.html' : '/'
     }
   } else if (versionSlug) {
     versionURL.pathname =
-      baseSegment === 'index.html' ? `/${versionSlug}.html` : `/${versionSlug}${versionURL.pathname}`
+      baseSegment === 'index.html'
+        ? `/${versionSlug}.html`
+        : versionRedirect === 'same-page'
+          ? `/${versionSlug}${versionURL.pathname}`
+          : isHTML
+            ? `${versionSlug}.html`
+            : `/${versionSlug}/`
+  } else if (versionRedirect === 'root' && !isRootHTML) {
+    versionURL.pathname = isHTML ? `/index.html` : versionSlug
   }
 
   if (hasBase) {
