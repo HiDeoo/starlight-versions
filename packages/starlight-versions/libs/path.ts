@@ -32,7 +32,11 @@ export function slugifyPath(filePath: string): string {
   return segments.map((segment) => slug(segment)).join('/')
 }
 
-function stripExtension(filePath: string) {
+export function getExtension(filePath: string) {
+  return path.extname(filePath)
+}
+
+export function stripExtension(filePath: string) {
   const parsedPath = path.parse(filePath)
 
   return path.posix.join(parsedPath.dir, parsedPath.name)

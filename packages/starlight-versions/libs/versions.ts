@@ -5,7 +5,7 @@ import type { DocsVersionsConfig } from '../schema'
 
 import { copyDirectory, ensureDirectory, listDirectory, readJSONFile, writeJSONFile } from './fs'
 import { transformMarkdown } from './markdown'
-import { ensureTrailingSlash, stripLeadingSlash, stripTrailingSlash } from './path'
+import { ensureTrailingSlash, getExtension, stripExtension, stripLeadingSlash, stripTrailingSlash } from './path'
 import { throwPluginError } from './plugin'
 import {
   getDocSlug,
@@ -17,12 +17,19 @@ import {
 
 const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionSidebarGroupLabel')
 
-export const VersionSchema = z.object({
+export const VersionBaseSchema = z.object({
   // TODO(HiDeoo) comment
-  label: z.string().optional(),
-  // TODO(HiDeoo) comment
-  slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
+  redirect: z.union([z.literal('home'), z.literal('same-page')]).default('same-page'),
 })
+
+export const VersionSchema = z
+  .object({
+    // TODO(HiDeoo) comment
+    label: z.string().optional(),
+    // TODO(HiDeoo) comment
+    slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
+  })
+  .merge(VersionBaseSchema)
 
 export async function ensureNewVersion(
   config: StarlightVersionsConfig,
@@ -34,11 +41,9 @@ export async function ensureNewVersion(
 
   if (!newVersion) return
 
-  const allVersions = new Set(config.versions.map(({ slug }) => slug))
-
   await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), async (entry) => {
     if (entry.type === 'directory') {
-      return entry.isRoot && allVersions.has(entry.name)
+      return entry.isRoot && entry.name in config.versionsBySlug
     }
 
     const md = await transformMarkdown(entry.content, {
@@ -89,8 +94,47 @@ export function getVersionSidebar(version: Version | undefined, sidebar: Starlig
 }
 
 // An undefined version is valid and represents the current version.
+// https://github.com/withastro/starlight/blob/64288fb0051310f7148afd13f65c578664f04eb2/packages/starlight/utils/localizedUrl.ts
+export function getVersionURL(config: StarlightVersionsConfig, url: URL, version: Version | undefined): URL {
+  const versionURL = new URL(url)
+  const versionSlug = version?.slug ?? ''
+
+  // TODO(HiDeoo)
+  const base = stripTrailingSlash(import.meta.env.BASE_URL)
+  const hasBase = versionURL.pathname.startsWith(base)
+
+  if (hasBase) {
+    versionURL.pathname = versionURL.pathname.replace(base, '')
+  }
+
+  const [, baseSegment] = versionURL.pathname.split('/')
+
+  const isRootHTML = baseSegment && getExtension(baseSegment) === '.html'
+  const baseSlug = isRootHTML ? stripExtension(baseSegment) : baseSegment
+
+  if (baseSlug && baseSlug in config.versionsBySlug) {
+    if (versionSlug) {
+      versionURL.pathname = versionURL.pathname.replace(baseSlug, versionSlug)
+    } else if (isRootHTML) {
+      versionURL.pathname = '/index.html'
+    } else {
+      versionURL.pathname = versionURL.pathname.replace(`/${baseSlug}`, '')
+    }
+  } else if (versionSlug) {
+    versionURL.pathname =
+      baseSegment === 'index.html' ? `/${versionSlug}.html` : `/${versionSlug}${versionURL.pathname}`
+  }
+
+  if (hasBase) {
+    versionURL.pathname = base + versionURL.pathname
+  }
+
+  return versionURL
+}
+
+// An undefined version is valid and represents the current version.
 export function getVersionFromSlug(config: StarlightVersionsConfig, slug: string): Version | undefined {
-  return config.versions.find((version) => slug.startsWith(`${version.slug}/`) || slug === version.slug)
+  return config.versions.find((version) => slug === version.slug || slug.startsWith(`${version.slug}/`))
 }
 
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {

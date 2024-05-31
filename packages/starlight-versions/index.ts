@@ -1,9 +1,11 @@
 import type { StarlightPlugin } from '@astrojs/starlight/types'
-import { z } from 'astro/zod'
 
+import { StarlightVersionsConfigSchema, type StarlightVersionsUserConfig } from './libs/config'
 import { overrideComponents, throwPluginError } from './libs/plugin'
-import { ensureNewVersion, getVersionedSidebar, VersionSchema } from './libs/versions'
+import { ensureNewVersion, getVersionedSidebar } from './libs/versions'
 import { vitePluginStarlightVersions } from './libs/vite'
+
+export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './libs/config'
 
 // TODO(HiDeoo) docs: aside early prototype
 // TODO(HiDeoo) navigation links
@@ -18,24 +20,8 @@ import { vitePluginStarlightVersions } from './libs/vite'
 // TODO(HiDeoo) outdated version notice
 // TODO(HiDeoo) option to redirect to homepage when selecting a version (redirect/behavior)
 
-const starlightVersionsConfigSchema = z.object({
-  // TODO(HiDeoo) comment
-  current: z
-    .object({
-      // TODO(HiDeoo) comment
-      label: z.string().default('Latest'),
-    })
-    .default({}),
-  // TODO(HiDeoo) comment
-  versions: z.array(VersionSchema).refine((value) => value.length > 0, {
-    // TODO(HiDeoo)
-    message: 'At least one version must be defined.',
-  }),
-  // TODO(HiDeoo) Add all versions to the schema so it's easier to use it
-})
-
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
-  const parsedConfig = starlightVersionsConfigSchema.safeParse(userConfig)
+  const parsedConfig = StarlightVersionsConfigSchema.safeParse(userConfig)
 
   if (!parsedConfig.success) {
     throwPluginError(
@@ -90,6 +76,3 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
     },
   }
 }
-
-export type StarlightVersionsUserConfig = z.input<typeof starlightVersionsConfigSchema>
-export type StarlightVersionsConfig = z.output<typeof starlightVersionsConfigSchema>

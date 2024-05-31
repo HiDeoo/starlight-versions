@@ -3,24 +3,31 @@ import { Icon } from '@astrojs/starlight/components'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getPageSlug } from '../libs/starlight'
-import { getVersionFromSlug } from '../libs/versions'
+import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
-const version = getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astro.url))
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astro.url))
 
 // TODO(HiDeoo) trailing slash?
-// TODO(HiDeoo) same page?
+// TODO(HiDeoo) redirect behavior
 ---
 
 <starlight-version-select>
   <label>
     <span class="sr-only">Select version</span>
     <Icon name="seti:clock" class="icon label-icon" />
-    <select value={version?.label ?? 'current'}>
-      <option value="" selected={version === undefined}>{starlightVersionsConfig.current.label}</option>
+    <select value={pageVersion?.label ?? 'current'}>
+      <option
+        selected={pageVersion === undefined}
+        value={getVersionURL(starlightVersionsConfig, Astro.url, undefined).pathname}
+        >{starlightVersionsConfig.current.label}</option
+      >
       {
-        starlightVersionsConfig.versions.map(({ label, slug }) => (
-          <option value={slug} selected={slug === version?.slug}>
-            {label ?? slug}
+        starlightVersionsConfig.versions.map((version) => (
+          <option
+            selected={version.slug === pageVersion?.slug}
+            value={getVersionURL(starlightVersionsConfig, Astro.url, version).pathname}
+          >
+            {version.label ?? version.slug}
           </option>
         ))
       }
