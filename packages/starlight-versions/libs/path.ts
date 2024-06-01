@@ -2,6 +2,8 @@ import path from 'node:path'
 
 import { slug } from 'github-slugger'
 
+const absoluteLinkRegex = /^https?:\/\//
+
 export function ensureTrailingSlash(filePath: string): string {
   if (filePath.endsWith('/')) {
     return filePath
@@ -40,4 +42,8 @@ export function stripExtension(filePath: string) {
   const parsedPath = path.parse(filePath)
 
   return path.posix.join(parsedPath.dir, parsedPath.name)
+}
+
+export function isAbsoluteLink(link: string) {
+  return absoluteLinkRegex.test(link)
 }

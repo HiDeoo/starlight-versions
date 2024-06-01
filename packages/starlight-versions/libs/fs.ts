@@ -39,6 +39,10 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
   }
 }
 
+export function copyFile(source: URL, dest: URL) {
+  return fs.cp(source, dest, { force: true })
+}
+
 export function writeJSONFile(file: PathLike, data: unknown) {
   return fs.writeFile(file, JSON.stringify(data, null, 2))
 }

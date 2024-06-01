@@ -3,7 +3,9 @@ import { describe, expect, test } from 'vitest'
 import { transformMarkdown, type TransformContext } from '../libs/markdown'
 
 const context: TransformContext = {
+  assets: [],
   slug: 'test',
+  url: new URL('src/content/docs/test.md', import.meta.url),
   version: {
     slug: '2.0.1',
     redirect: 'same-page',

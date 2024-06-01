@@ -7,9 +7,7 @@ import type { StarlightPlugin } from '@astrojs/starlight/types'
 import type { z } from 'astro/zod'
 import yaml from 'yaml'
 
-import { slugifyPath } from './path'
-
-const absoluteLinkRegex = /^https?:\/\//
+import { isAbsoluteLink, slugifyPath } from './path'
 
 export function parseFrontmatter(frontmatter: string) {
   return yaml.parse(frontmatter) as StarlightFrontmatter
@@ -44,7 +42,7 @@ export function addPrefixToSidebarConfig(
           directory: path.posix.join(prefix, item.autogenerate.directory),
         },
       }
-    } else if (isAbsoluteSidebarLinkItem(item.link)) {
+    } else if (isAbsoluteLink(item.link)) {
       return item
     }
 
@@ -60,10 +58,6 @@ export function addPrefixToSidebarConfig(
 
 export function getPageSlug(url: URL) {
   return url.pathname.replace(/^\//, '').replace(/\/$/, '')
-}
-
-function isAbsoluteSidebarLinkItem(link: string) {
-  return absoluteLinkRegex.test(link)
 }
 
 type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> & {

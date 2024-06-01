@@ -1,14 +1,17 @@
-import type { Link, Root } from 'mdast'
-import type { MdxJsxTextElement } from 'mdast-util-mdx-jsx'
+import assert from 'node:assert'
+
+import type { Image, Link, Root } from 'mdast'
+import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx'
+import type { MdxjsEsm } from 'mdast-util-mdxjs-esm'
 import { remark } from 'remark'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdx from 'remark-mdx'
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
 import type { VFile } from 'vfile'
 
-import { stripLeadingSlash, stripTrailingSlash } from './path'
+import { isAbsoluteLink, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
-import type { Version } from './versions'
+import type { Version, VersionAsset } from './versions'
 
 const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 
@@ -19,6 +22,7 @@ export async function transformMarkdown(markdown: string, context: TransformCont
   })
 
   return {
+    assets: file.data.assets,
     content: String(file),
   }
 }
@@ -36,6 +40,19 @@ export function remarkStarlightVersions() {
           }
 
           return CONTINUE
+        }
+        case 'mdxjsEsm': {
+          return handleImports(node, file)
+        }
+        case 'mdxJsxFlowElement': {
+          if (node.name === 'img' || node.name === 'Image') {
+            return handleImageElements(node, file)
+          }
+
+          return CONTINUE
+        }
+        case 'image': {
+          return handleImages(node, file)
         }
         default: {
           return CONTINUE
@@ -69,7 +86,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
 function handleLinks(node: Link, file: VFile) {
   if (!node.url.startsWith('/')) return SKIP
 
-  node.url = addVersionSlugToLink(node.url, file.data.version?.slug)
+  node.url = addVersionToLink(node.url, file.data.version)
 
   return SKIP
 }
@@ -79,22 +96,90 @@ function handleLinkElements(node: MdxJsxTextElement, file: VFile) {
 
   if (!href || typeof href.value !== 'string' || !href.value.startsWith('/')) return CONTINUE
 
-  href.value = addVersionSlugToLink(href.value, file.data.version?.slug)
+  href.value = addVersionToLink(href.value, file.data.version)
 
   return CONTINUE
 }
 
-function addVersionSlugToLink(link: string, versionSlug?: string) {
-  if (!versionSlug) return link
+function handleImages(node: Image, file: VFile) {
+  if (isAbsoluteLink(node.url)) return SKIP
+
+  const isPublicAsset = node.url.startsWith('/')
+
+  const { source, dest, url } = (isPublicAsset ? addVersionToPublicAsset : addVersionToAstroAsset)(node.url, file)
+  node.url = url
+  file.data.assets?.push({ source, dest })
+
+  return SKIP
+}
+
+function handleImageElements(node: MdxJsxFlowElement, file: VFile) {
+  const src = node.attributes.find((attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'src')
+
+  if (!src || typeof src.value !== 'string' || !src.value.startsWith('/')) return SKIP
+
+  const { source, dest, url } = addVersionToPublicAsset(src.value, file)
+  src.value = url
+  file.data.assets?.push({ source, dest })
+
+  return SKIP
+}
+
+function handleImports(node: MdxjsEsm, file: VFile) {
+  const t = /(from ?["'])([^"']*(?:png|bmp))(["']\s?)$/gm
+
+  node.value = node.value.replaceAll(t, (match, start, importPath: string, end) => {
+    if (!importPath.startsWith('../')) return match
+
+    const { source, dest, url } = addVersionToAstroAsset(importPath, file)
+    file.data.assets?.push({ source, dest })
+    return `${start}${url}${end}`
+  })
+
+  return SKIP
+}
+
+function addVersionToLink(link: string, version?: Version) {
+  assert(version, 'A version must be provided to add a version to a link.')
 
   const segments = link.split('/')
-  segments.splice(1, 0, versionSlug)
+  segments.splice(1, 0, version.slug)
 
   return segments.join('/')
 }
 
+function addVersionToAstroAsset(asset: string, file: VFile) {
+  assert(file.data.version, 'A version must be provided to add a version to an Astro asset.')
+
+  const source = new URL(asset, file.data.url)
+
+  const segments = asset.split('/')
+  segments.splice(-1, 0, file.data.version.slug)
+
+  const dest = new URL(segments.join('/'), file.data.url)
+
+  segments.splice(0, 0, '..')
+
+  return { source, dest, url: segments.join('/') }
+}
+
+function addVersionToPublicAsset(asset: string, file: VFile) {
+  assert(file.data.version, 'A version must be provided to add a version to an public asset.')
+
+  const source = new URL(asset, file.data.url)
+
+  const segments = asset.split('/')
+  segments.splice(-1, 0, file.data.version.slug)
+
+  const dest = new URL(segments.join('/'), file.data.url)
+
+  return { source, dest, url: segments.join('/') }
+}
+
 export interface TransformContext {
+  assets: VersionAsset[]
   slug: string
+  url: URL
   version: Version
 }
 

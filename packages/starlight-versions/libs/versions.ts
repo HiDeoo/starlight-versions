@@ -4,7 +4,7 @@ import { z } from 'astro/zod'
 import type { StarlightVersionsConfig } from '..'
 import type { DocsVersionsConfig } from '../schema'
 
-import { copyDirectory, ensureDirectory, listDirectory, readJSONFile, writeJSONFile } from './fs'
+import { copyDirectory, copyFile, ensureDirectory, listDirectory, readJSONFile, writeJSONFile } from './fs'
 import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash, getExtension, stripExtension, stripLeadingSlash, stripTrailingSlash } from './path'
 import { throwPluginError } from './plugin'
@@ -42,18 +42,28 @@ export async function ensureNewVersion(
 
   if (!newVersion) return
 
+  const assets: VersionAsset[] = []
+
   await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), async (entry) => {
     if (entry.type === 'directory') {
       return entry.isRoot && entry.name in config.versionsBySlug
     }
 
     const md = await transformMarkdown(entry.content, {
+      assets: [],
       slug: getDocSlug(docsDir, entry.url),
+      url: entry.url,
       version: newVersion,
     })
 
+    assets.push(...(md.assets ?? []))
+
     return md.content
   })
+
+  for (const asset of assets) {
+    await copyFile(asset.source, asset.dest)
+  }
 
   await makeVersionConfig(newVersion, starlightConfig, srcDir)
 }
@@ -237,3 +247,8 @@ function getVersionConfigURL(version: Version, srcDir: URL) {
 }
 
 export type Version = z.output<typeof VersionSchema>
+
+export interface VersionAsset {
+  source: URL
+  dest: URL
+}
