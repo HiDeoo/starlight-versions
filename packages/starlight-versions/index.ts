@@ -29,7 +29,9 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
-      async setup({ addIntegration, astroConfig, config: starlightConfig, logger, updateConfig }) {
+      async setup({ addIntegration, astroConfig, command, config: starlightConfig, logger, updateConfig }) {
+        if (command !== 'dev' && command !== 'build') return
+
         try {
           // TODO(HiDeoo) logs/cli/feedback
           await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
