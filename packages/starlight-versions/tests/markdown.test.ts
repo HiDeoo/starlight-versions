@@ -106,7 +106,22 @@ import Test from '../../components/Test.astro'
 <img src={test4.src} alt="Test 4"/>
 
 <Image src="/test5.png" alt="Test 5" />
-<img src="/test6.png" alt="Test 6" />`)
+<img src="/test6.png" alt="Test 6" />
+
+import test7 from "../../assets/test7.png";
+import test8 from '../../assets/test8.png';
+
+<Picture src={test7} formats={['avif', 'webp']} alt="Test 7" />
+
+<picture>
+  <source srcset={test7.src} media="(orientation: portrait)" />
+  <img src={test8.src} alt="Test 8" />
+</picture>
+
+<picture>
+  <source srcset="/test9.png" media="(orientation: portrait)" />
+  <img src="/test10.png" alt="Test 10" />
+</picture>`)
 
     expect(result.content).toMatchInlineSnapshot(`
       "import { Image } from 'astro:assets'
@@ -125,10 +140,27 @@ import Test from '../../components/Test.astro'
       <Image src="/2.0/test5.png" alt="Test 5" />
 
       <img src="/2.0/test6.png" alt="Test 6" />
+
+      import test7 from "../../../assets/2.0/test7.png";
+      import test8 from '../../../assets/2.0/test8.png';
+
+      <Picture src={test7} formats={['avif', 'webp']} alt="Test 7" />
+
+      <picture>
+        <source srcset={test7.src} media="(orientation: portrait)" />
+
+        <img src={test8.src} alt="Test 8" />
+      </picture>
+
+      <picture>
+        <source srcset="/2.0/test9.png" media="(orientation: portrait)" />
+
+        <img src="/2.0/test10.png" alt="Test 10" />
+      </picture>
       "
     `)
 
-    expect(result.assets).toHaveLength(4)
+    expect(result.assets).toHaveLength(8)
 
     expect(result.assets?.[0]?.source.href).toMatch(/\/src\/assets\/test3\.png$/)
     expect(result.assets?.[0]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test3\.png$/)
@@ -141,6 +173,21 @@ import Test from '../../components/Test.astro'
 
     expect(result.assets?.[3]?.source.href).toMatch(/\/test6\.png$/)
     expect(result.assets?.[3]?.dest.href).toMatch(/\/2\.0\/test6\.png$/)
+
+    expect(result.assets?.[4]?.source.href).toMatch(/\/test7\.png$/)
+    expect(result.assets?.[4]?.dest.href).toMatch(/\/2\.0\/test7\.png$/)
+
+    expect(result.assets?.[5]?.source.href).toMatch(/\/test8\.png$/)
+    expect(result.assets?.[5]?.dest.href).toMatch(/\/2\.0\/test8\.png$/)
+
+    expect(result.assets?.[5]?.source.href).toMatch(/\/test8\.png$/)
+    expect(result.assets?.[5]?.dest.href).toMatch(/\/2\.0\/test8\.png$/)
+
+    expect(result.assets?.[6]?.source.href).toMatch(/\/test9\.png$/)
+    expect(result.assets?.[6]?.dest.href).toMatch(/\/2\.0\/test9\.png$/)
+
+    expect(result.assets?.[7]?.source.href).toMatch(/\/test10\.png$/)
+    expect(result.assets?.[7]?.dest.href).toMatch(/\/2\.0\/test10\.png$/)
   })
 })
 

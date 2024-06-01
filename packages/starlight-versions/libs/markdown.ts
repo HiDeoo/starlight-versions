@@ -13,7 +13,7 @@ import { isAbsoluteLink, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version, VersionAsset } from './versions'
 
-const importPathRegex = /(from ?["'])([^"']*)(["']\s?)$/gm
+const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
 
 const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
@@ -48,7 +48,7 @@ export function remarkStarlightVersions() {
           return handleImports(node, file)
         }
         case 'mdxJsxFlowElement': {
-          if (node.name === 'img' || node.name === 'Image') {
+          if (node.name === 'img' || node.name === 'source' || node.name === 'Image') {
             return handleImageElements(node, file)
           }
 
@@ -117,12 +117,14 @@ function handleImages(node: Image, file: VFile) {
 }
 
 function handleImageElements(node: MdxJsxFlowElement, file: VFile) {
-  const src = node.attributes.find((attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'src')
+  const srcOrSrcset = node.attributes.find(
+    (attribute) => attribute.type === 'mdxJsxAttribute' && (attribute.name === 'src' || attribute.name === 'srcset'),
+  )
 
-  if (!src || typeof src.value !== 'string' || !src.value.startsWith('/')) return SKIP
+  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string' || !srcOrSrcset.value.startsWith('/')) return SKIP
 
-  const { source, dest, url } = addVersionToPublicAsset(src.value, file)
-  src.value = url
+  const { source, dest, url } = addVersionToPublicAsset(srcOrSrcset.value, file)
+  srcOrSrcset.value = url
   file.data.assets?.push({ source, dest })
 
   return SKIP
