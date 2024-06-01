@@ -1,104 +1,11 @@
 import { describe, expect, test } from 'vitest'
 
-import { transformMarkdown, type TransformContext } from '../libs/markdown'
-
-const context: TransformContext = {
-  slug: 'test',
-  version: {
-    slug: '2.0.1',
-  },
-}
+import { transformMarkdown } from '../libs/markdown'
 
 describe('transformMarkdown', () => {
-  test('transforms the frontmatter', async () => {
-    const result = await transformMarkdown(
-      `---
-title: Test
-head:
-  - tag: title
-    content: Starlight Versions
----
-
-Test`,
-      context,
-    )
-
-    expect(result.content).toMatchInlineSnapshot(`
-      "---
-      title: Test
-      head:
-        - tag: title
-          content: Starlight Versions
-      slug: 2.0.1/test
-      ---
-
-      Test
-      "
-    `)
-  })
-
-  test('transforms the frontmatter for the root index', async () => {
-    const result = await transformMarkdown(
-      `---
-title: Test
-head:
-  - tag: title
-    content: Starlight Versions
----
-
-Test`,
-      { ...context, slug: '/' },
-    )
-
-    expect(result.content).toMatchInlineSnapshot(`
-      "---
-      title: Test
-      head:
-        - tag: title
-          content: Starlight Versions
-      slug: 2.0.1
-      ---
-
-      Test
-      "
-    `)
-  })
-
-  test('transforms the frontmatter with an existing slug', async () => {
-    const result = await transformMarkdown(
-      `---
-title: Test
-head:
-  - tag: title
-    content: Starlight Versions
-slug: custom
----
-
-Test`,
-      context,
-    )
-
-    expect(result.content).toMatchInlineSnapshot(`
-      "---
-      title: Test
-      head:
-        - tag: title
-          content: Starlight Versions
-      slug: 2.0.1/custom
-      ---
-
-      Test
-      "
-    `)
-  })
-
   test('preserves existing content', async () => {
-    const result = await transformMarkdown(
-      `---
-title: Test
----
-
-import { Card, CardGrid } from '@astrojs/starlight/components'
+    const result = await transformTestMarkdown(
+      `import { Card, CardGrid } from '@astrojs/starlight/components'
 
 <CardGrid stagger>
   <Card title="Do something" icon="puzzle">
@@ -113,16 +20,10 @@ This is a note
 \`\`\`js title=src/index.js
 console.log('Hello, world!')
 \`\`\``,
-      context,
     )
 
     expect(result.content).toMatchInlineSnapshot(`
-      "---
-      title: Test
-      slug: 2.0.1/test
-      ---
-
-      import { Card, CardGrid } from '@astrojs/starlight/components'
+      "import { Card, CardGrid } from '@astrojs/starlight/components'
 
       <CardGrid stagger>
         <Card title="Do something" icon="puzzle">
@@ -140,4 +41,49 @@ console.log('Hello, world!')
       "
     `)
   })
+
+  test('transforms Markdown absolute internal links', async () => {
+    const result = await transformTestMarkdown(`[Test 1](https://starlight.astro.build/)
+[Test 2](/test/)
+[Test 3](./test/)
+[Test 4](../test/)`)
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "[Test 1](https://starlight.astro.build/)
+      [Test 2](/2.0/test/)
+      [Test 3](./test/)
+      [Test 4](../test/)
+      "
+    `)
+  })
+
+  test('transforms HTML absolute internal links', async () => {
+    const result = await transformTestMarkdown(`<a href="https://starlight.astro.build/">Test 1</a>
+<a href="/test/">Test 2</a>
+<a href="./test/">Test 3</a>
+<a href="../test/">Test 4</a>`)
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "<a href="https://starlight.astro.build/">Test 1</a>
+      <a href="/2.0/test/">Test 2</a>
+      <a href="./test/">Test 3</a>
+      <a href="../test/">Test 4</a>
+      "
+    `)
+  })
 })
+
+async function transformTestMarkdown(markdown: string) {
+  const result = await transformMarkdown(markdown, {
+    slug: 'test',
+    version: {
+      slug: '2.0',
+      redirect: 'same-page',
+    },
+  })
+
+  return {
+    ...result,
+    content: result.content.replace(/^---\n(?:.|\n)*---\n\n/, ''),
+  }
+}

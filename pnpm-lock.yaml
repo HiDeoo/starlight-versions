@@ -65,6 +65,9 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
+      mdast-util-mdx-jsx:
+        specifier: ^3.1.2
+        version: 3.1.2
       remark:
         specifier: ^15.0.1
         version: 15.0.1
@@ -74,6 +77,9 @@ importers:
       remark-mdx:
         specifier: ^3.0.1
         version: 3.0.1
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
       vfile:
         specifier: ^6.0.1
         version: 6.0.1
