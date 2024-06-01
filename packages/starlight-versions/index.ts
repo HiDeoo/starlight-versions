@@ -9,16 +9,11 @@ export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './lib
 
 // TODO(HiDeoo) docs: aside early prototype
 // TODO(HiDeoo) navigation links
+// TODO(HiDeoo) frontmatter paths/links
 // TODO(HiDeoo) search
-// TODO(HiDeoo) assets
-// TODO(HiDeoo) i18n
-// TODO(HiDeoo) i18n fallback
-// TODO(HiDeoo) vsc settings to ignore old versions or something?
-// TODO(HiDeoo) base
-// TODO(HiDeoo) trailing slash?
+// TODO(HiDeoo) assets/paths/links
 // TODO(HiDeoo) MDX comment issue when creating a new version (maybe we just need to have a mdx processor?)
 // TODO(HiDeoo) outdated version notice (notice on splash page)
-// TODO(HiDeoo) option to redirect to homepage when selecting a version (redirect/behavior)
 
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
   const parsedConfig = StarlightVersionsConfigSchema.safeParse(userConfig)
