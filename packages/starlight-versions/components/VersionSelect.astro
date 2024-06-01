@@ -1,5 +1,6 @@
 ---
 import { Icon } from '@astrojs/starlight/components'
+import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getPageSlug } from '../libs/starlight'
@@ -15,14 +16,14 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astr
     <select value={pageVersion?.label ?? 'current'}>
       <option
         selected={pageVersion === undefined}
-        value={getVersionURL(starlightVersionsConfig, Astro.url, undefined).pathname}
+        value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}
         >{starlightVersionsConfig.current.label}</option
       >
       {
         starlightVersionsConfig.versions.map((version) => (
           <option
             selected={version.slug === pageVersion?.slug}
-            value={getVersionURL(starlightVersionsConfig, Astro.url, version).pathname}
+            value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, version).pathname}
           >
             {version.label ?? version.slug}
           </option>

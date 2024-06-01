@@ -1,3 +1,4 @@
+import type { StarlightConfig } from '@astrojs/starlight/types'
 import { z } from 'astro/zod'
 
 import type { StarlightVersionsConfig } from '..'
@@ -95,7 +96,12 @@ export function getVersionSidebar(version: Version | undefined, sidebar: Starlig
 
 // An undefined version is valid and represents the current version.
 // https://github.com/withastro/starlight/blob/64288fb0051310f7148afd13f65c578664f04eb2/packages/starlight/utils/localizedUrl.ts
-export function getVersionURL(config: StarlightVersionsConfig, url: URL, version: Version | undefined): URL {
+export function getVersionURL(
+  config: StarlightVersionsConfig,
+  starlightConfig: StarlightConfig,
+  url: URL,
+  version: Version | undefined,
+): URL {
   const versionURL = new URL(url)
   const versionSlug = version?.slug ?? ''
   const versionRedirect = version?.redirect ?? config.current.redirect
@@ -107,21 +113,34 @@ export function getVersionURL(config: StarlightVersionsConfig, url: URL, version
     versionURL.pathname = versionURL.pathname.replace(base, '')
   }
 
-  const isHTML = getExtension(versionURL.pathname) === '.html'
+  let baseSegment: string | undefined
+  let localeSegment: string | undefined
 
-  const [, baseSegment] = versionURL.pathname.split('/')
+  const isHTML = getExtension(versionURL.pathname) === '.html'
+  const [, firstSegment, secondSegment] = versionURL.pathname.split('/')
+
+  if (starlightConfig.isMultilingual || starlightConfig.locales) {
+    const versionOrLocale = firstSegment?.replace('.html', '')
+    const isRootLocale = versionOrLocale && !Object.keys(starlightConfig.locales).includes(versionOrLocale)
+    baseSegment = isRootLocale ? firstSegment : secondSegment
+
+    if (!isRootLocale) {
+      localeSegment = versionOrLocale
+      versionURL.pathname = versionURL.pathname.replace(`/${firstSegment}`, '')
+    }
+  } else {
+    baseSegment = firstSegment
+  }
 
   const isRootHTML = baseSegment && getExtension(baseSegment) === '.html'
-  const baseSlug = isRootHTML ? stripExtension(baseSegment) : baseSegment
+  const baseSlug = baseSegment && isRootHTML ? stripExtension(baseSegment) : baseSegment
 
   if (baseSlug && baseSlug in config.versionsBySlug) {
     if (versionSlug) {
       versionURL.pathname =
         versionRedirect === 'same-page'
           ? versionURL.pathname.replace(baseSlug, versionSlug)
-          : isHTML
-            ? `${versionSlug}.html`
-            : `${versionSlug}/`
+          : `${versionSlug}${isHTML ? '.html' : '/'}`
     } else if (isRootHTML) {
       versionURL.pathname = '/index.html'
     } else {
@@ -138,7 +157,15 @@ export function getVersionURL(config: StarlightVersionsConfig, url: URL, version
             ? `${versionSlug}.html`
             : `/${versionSlug}/`
   } else if (versionRedirect === 'root' && !isRootHTML) {
-    versionURL.pathname = isHTML ? `/index.html` : versionSlug
+    versionURL.pathname = isHTML ? '/index.html' : versionSlug
+  }
+
+  if (localeSegment) {
+    versionURL.pathname = isHTML
+      ? versionURL.pathname === '/index.html'
+        ? `/${localeSegment}.html`
+        : `/${localeSegment}${versionURL.pathname.replace(/\/$/, '.html')}`
+      : `/${localeSegment}${versionURL.pathname}`
   }
 
   if (hasBase) {
