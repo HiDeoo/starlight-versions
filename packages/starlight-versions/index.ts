@@ -12,7 +12,6 @@ export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './lib
 // TODO(HiDeoo) frontmatter paths/links
 // TODO(HiDeoo) search
 // TODO(HiDeoo) assets/paths/links
-// TODO(HiDeoo) MDX comment issue when creating a new version (maybe we just need to have a mdx processor?)
 // TODO(HiDeoo) outdated version notice (notice on splash page)
 
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {

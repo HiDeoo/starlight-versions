@@ -1,13 +1,14 @@
 import type { Root } from 'mdast'
 import { remark } from 'remark'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkMdx from 'remark-mdx'
 import type { VFile } from 'vfile'
 
 import { stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version } from './versions'
 
-const processor = remark().use(remarkFrontmatter).use(remarkStarlightVersions)
+const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
   const file = await processor.process({
