@@ -13,6 +13,9 @@ import { isAbsoluteLink, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version, VersionAsset } from './versions'
 
+const importPathRegex = /(from ?["'])([^"']*)(["']\s?)$/gm
+const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
+
 const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
@@ -126,14 +129,16 @@ function handleImageElements(node: MdxJsxFlowElement, file: VFile) {
 }
 
 function handleImports(node: MdxjsEsm, file: VFile) {
-  const t = /(from ?["'])([^"']*(?:png|bmp))(["']\s?)$/gm
-
-  node.value = node.value.replaceAll(t, (match, start, importPath: string, end) => {
+  node.value = node.value.replaceAll(importPathRegex, (match, start, importPath: string, end) => {
     if (!importPath.startsWith('../')) return match
 
-    const { source, dest, url } = addVersionToAstroAsset(importPath, file)
-    file.data.assets?.push({ source, dest })
-    return `${start}${url}${end}`
+    if (isAstroAsset(importPath)) {
+      const { source, dest, url } = addVersionToAstroAsset(importPath, file)
+      file.data.assets?.push({ source, dest })
+      return `${start}${url}${end}`
+    }
+
+    return `${start}../${importPath}${end}`
   })
 
   return SKIP
@@ -174,6 +179,10 @@ function addVersionToPublicAsset(asset: string, file: VFile) {
   const dest = new URL(segments.join('/'), file.data.url)
 
   return { source, dest, url: segments.join('/') }
+}
+
+function isAstroAsset(asset: string) {
+  return astroAssetRegex.test(asset)
 }
 
 export interface TransformContext {

@@ -84,6 +84,8 @@ console.log('Hello, world!')
       "
     `)
 
+    expect(result.assets).toHaveLength(2)
+
     expect(result.assets?.[0]?.source.href).toMatch(/\/test\.png$/)
     expect(result.assets?.[0]?.dest.href).toMatch(/\/2\.0\/test\.png$/)
 
@@ -91,47 +93,54 @@ console.log('Hello, world!')
     expect(result.assets?.[1]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test\.png$/)
   })
 
-  test('transforms and copies HTML and MDX images', async () => {
+  test('transforms import paths and copies HTML and MDX images', async () => {
     const result = await transformTestMarkdown(`import { Image } from 'astro:assets'
-import test2 from '../../assets/test2.png'
 import test3 from '../../assets/test3.png'
+import test4 from '../../assets/test4.png'
+import Test from '../../components/Test.astro'
 
 <img src="https://example.com/test.png" alt="Test 1"/>
+<Image src="https://example.com/test.png" alt="Test 2"/>
 
-<Image src={test2} alt="Test 2" />
-<img src={test3.src} alt="Test 3"/>
+<Image src={test3} alt="Test 3" />
+<img src={test4.src} alt="Test 4"/>
 
-<Image src="/test4.png" alt="Test 4" />
-<img src="/test5.png" alt="Test 5" />`)
+<Image src="/test5.png" alt="Test 5" />
+<img src="/test6.png" alt="Test 6" />`)
 
     expect(result.content).toMatchInlineSnapshot(`
       "import { Image } from 'astro:assets'
-      import test2 from '../../../assets/2.0/test2.png'
       import test3 from '../../../assets/2.0/test3.png'
+      import test4 from '../../../assets/2.0/test4.png'
+      import Test from '../../../components/Test.astro'
 
       <img src="https://example.com/test.png" alt="Test 1" />
 
-      <Image src={test2} alt="Test 2" />
+      <Image src="https://example.com/test.png" alt="Test 2" />
 
-      <img src={test3.src} alt="Test 3" />
+      <Image src={test3} alt="Test 3" />
 
-      <Image src="/2.0/test4.png" alt="Test 4" />
+      <img src={test4.src} alt="Test 4" />
 
-      <img src="/2.0/test5.png" alt="Test 5" />
+      <Image src="/2.0/test5.png" alt="Test 5" />
+
+      <img src="/2.0/test6.png" alt="Test 6" />
       "
     `)
 
-    expect(result.assets?.[0]?.source.href).toMatch(/\/src\/assets\/test2\.png$/)
-    expect(result.assets?.[0]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test2\.png$/)
+    expect(result.assets).toHaveLength(4)
 
-    expect(result.assets?.[1]?.source.href).toMatch(/\/src\/assets\/test3\.png$/)
-    expect(result.assets?.[1]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test3\.png$/)
+    expect(result.assets?.[0]?.source.href).toMatch(/\/src\/assets\/test3\.png$/)
+    expect(result.assets?.[0]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test3\.png$/)
 
-    expect(result.assets?.[2]?.source.href).toMatch(/\/test4\.png$/)
-    expect(result.assets?.[2]?.dest.href).toMatch(/\/2\.0\/test4\.png$/)
+    expect(result.assets?.[1]?.source.href).toMatch(/\/src\/assets\/test4\.png$/)
+    expect(result.assets?.[1]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test4\.png$/)
 
-    expect(result.assets?.[3]?.source.href).toMatch(/\/test5\.png$/)
-    expect(result.assets?.[3]?.dest.href).toMatch(/\/2\.0\/test5\.png$/)
+    expect(result.assets?.[2]?.source.href).toMatch(/\/test5\.png$/)
+    expect(result.assets?.[2]?.dest.href).toMatch(/\/2\.0\/test5\.png$/)
+
+    expect(result.assets?.[3]?.source.href).toMatch(/\/test6\.png$/)
+    expect(result.assets?.[3]?.dest.href).toMatch(/\/2\.0\/test6\.png$/)
   })
 })
 
