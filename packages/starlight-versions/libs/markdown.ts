@@ -69,6 +69,14 @@ export function remarkStarlightVersions() {
   }
 }
 
+// TODO(HiDeoo) frontmatter
+// TODO(HiDeoo)  - hero
+// TODO(HiDeoo)     - image
+// TODO(HiDeoo)         - file
+// TODO(HiDeoo)         - dark
+// TODO(HiDeoo)         - light
+// TODO(HiDeoo)     - actions => link
+
 function handleFrontmatter(tree: Root, file: VFile) {
   // The frontmatter is always at the root of the tree.
   for (const node of tree.children) {
@@ -82,6 +90,14 @@ function handleFrontmatter(tree: Root, file: VFile) {
       stripTrailingSlash(`${file.data.version?.slug}/${stripTrailingSlash(frontmatter.slug ?? file.data.slug ?? '')}`),
     )
 
+    if (typeof frontmatter.prev === 'object' && frontmatter.prev.link.startsWith('/')) {
+      frontmatter.prev.link = addVersionToLink(frontmatter.prev.link, file)
+    }
+
+    if (typeof frontmatter.next === 'object' && frontmatter.next.link.startsWith('/')) {
+      frontmatter.next.link = addVersionToLink(frontmatter.next.link, file)
+    }
+
     node.value = getFrontmatterNodeValue(frontmatter)
 
     break
@@ -91,7 +107,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
 function handleLinks(node: Link, file: VFile) {
   if (!isPublicAsset(node.url)) return SKIP
 
-  node.url = addVersionToLink(node.url, file.data.version)
+  node.url = addVersionToLink(node.url, file)
 
   return SKIP
 }
@@ -101,7 +117,7 @@ function handleLinkElements(node: MdxJsxTextElement, file: VFile) {
 
   if (!href || typeof href.value !== 'string' || !isPublicAsset(href.value)) return CONTINUE
 
-  href.value = addVersionToLink(href.value, file.data.version)
+  href.value = addVersionToLink(href.value, file)
 
   return CONTINUE
 }
@@ -140,11 +156,11 @@ function handleImports(node: MdxjsEsm, file: VFile) {
   return SKIP
 }
 
-function addVersionToLink(link: string, version?: Version) {
-  assert(version, 'A version must be provided to add a version to a link.')
+function addVersionToLink(link: string, file: VFile) {
+  assert(file.data.version, 'A version must be provided to add a version to an Astro asset.')
 
   const segments = link.split('/')
-  segments.splice(1, 0, version.slug)
+  segments.splice(1, 0, file.data.version.slug)
 
   return segments.join('/')
 }

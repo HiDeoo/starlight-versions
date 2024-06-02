@@ -13,7 +13,7 @@ const context: TransformContext = {
 }
 
 describe('transformMarkdown', () => {
-  test('transforms the frontmatter', async () => {
+  test('adds versioned slug', async () => {
     const result = await transformMarkdown(
       `---
 title: Test
@@ -40,7 +40,7 @@ Test`,
     `)
   })
 
-  test('transforms the frontmatter for the root index', async () => {
+  test('adds versioned slug for the root index', async () => {
     const result = await transformMarkdown(
       `---
 title: Test
@@ -67,7 +67,7 @@ Test`,
     `)
   })
 
-  test('transforms the frontmatter with an existing slug', async () => {
+  test('updates an existing slug to a versioned one', async () => {
     const result = await transformMarkdown(
       `---
 title: Test
@@ -95,51 +95,31 @@ Test`,
     `)
   })
 
-  test('preserves existing content', async () => {
+  test('updates existing prev/next links', async () => {
     const result = await transformMarkdown(
       `---
 title: Test
+prev:
+  link: /custom-prev/
+next:
+  link: /custom-next/
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components'
-
-<CardGrid stagger>
-  <Card title="Do something" icon="puzzle">
-    Test
-  </Card>
-</CardGrid>
-
-:::note
-This is a note
-:::
-
-\`\`\`js title=src/index.js
-console.log('Hello, world!')
-\`\`\``,
+Test`,
       context,
     )
 
     expect(result.content).toMatchInlineSnapshot(`
       "---
       title: Test
+      prev:
+        link: /2.0.1/custom-prev/
+      next:
+        link: /2.0.1/custom-next/
       slug: 2.0.1/test
       ---
 
-      import { Card, CardGrid } from '@astrojs/starlight/components'
-
-      <CardGrid stagger>
-        <Card title="Do something" icon="puzzle">
-          Test
-        </Card>
-      </CardGrid>
-
-      :::note
-      This is a note
-      :::
-
-      \`\`\`js title=src/index.js
-      console.log('Hello, world!')
-      \`\`\`
+      Test
       "
     `)
   })

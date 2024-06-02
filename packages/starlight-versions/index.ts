@@ -9,9 +9,7 @@ export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './lib
 
 // TODO(HiDeoo) docs: aside early prototype
 // TODO(HiDeoo) navigation links
-// TODO(HiDeoo) frontmatter paths/links
 // TODO(HiDeoo) search
-// TODO(HiDeoo) assets/paths/links
 // TODO(HiDeoo) outdated version notice (notice on splash page)
 
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
