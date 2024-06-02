@@ -1,7 +1,8 @@
-import { assert, describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { transformMarkdown } from '../libs/markdown'
-import type { VersionAsset } from '../libs/versions'
+
+import { expectVersionAssetToMatch, expectVersionAssetsToHaveLength } from './utils'
 
 describe('transformMarkdown', () => {
   test('preserves existing content', async () => {
@@ -85,7 +86,7 @@ console.log('Hello, world!')
       "
     `)
 
-    expect(result.assets).toHaveLength(2)
+    expectVersionAssetsToHaveLength(result.assets, 2)
 
     expectVersionAssetToMatch(result.assets?.[0], /\/test\.png$/, /\/2\.0\/test\.png$/)
     expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test\.png$/, /\/src\/assets\/2\.0\/test\.png$/)
@@ -158,7 +159,7 @@ import test8 from '../../assets/test8.png';
       "
     `)
 
-    expect(result.assets).toHaveLength(8)
+    expectVersionAssetsToHaveLength(result.assets, 8)
 
     expectVersionAssetToMatch(result.assets?.[0], /\/src\/assets\/test3\.png$/, /\/src\/assets\/2\.0\/test3\.png$/)
     expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test4\.png$/, /\/src\/assets\/2\.0\/test4\.png$/)
@@ -203,7 +204,7 @@ import test8 from '../../assets/test8.png';
       "
     `)
 
-    expect(result.assets).toHaveLength(3)
+    expectVersionAssetsToHaveLength(result.assets, 3)
 
     expectVersionAssetToMatch(result.assets?.[0], /\/test2\.mp3$/, /\/2\.0\/test2\.mp3$/)
     expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp3$/, /\/2\.0\/test5\.mp3$/)
@@ -243,7 +244,7 @@ import test8 from '../../assets/test8.png';
       "
     `)
 
-    expect(result.assets).toHaveLength(3)
+    expectVersionAssetsToHaveLength(result.assets, 3)
 
     expectVersionAssetToMatch(result.assets?.[0], /\/test2\.mp4$/, /\/2\.0\/test2\.mp4$/)
     expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp4$/, /\/2\.0\/test5\.mp4$/)
@@ -266,11 +267,4 @@ async function transformTestMarkdown(markdown: string) {
     ...result,
     content: result.content.replace(/^---\n(?:.|\n)*---\n\n/, ''),
   }
-}
-
-function expectVersionAssetToMatch(asset: VersionAsset | undefined, source: RegExp, dest: RegExp) {
-  assert(asset, 'Expected an asset to be defined.')
-
-  expect(asset.source.href).toMatch(source)
-  expect(asset.dest.href).toMatch(dest)
 }

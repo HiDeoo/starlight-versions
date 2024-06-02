@@ -61,22 +61,17 @@ export function getPageSlug(url: URL) {
 }
 
 type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> & {
-  hero?: StarlightFrontmatteHero
-  next?: StarlightFrontmatterPrevNextLink
-  prev?: StarlightFrontmatterPrevNextLink
   slug?: string
+  hero?: StarlightFrontmatteHero
 }
 
-type StarlightFrontmatterPrevNextLink =
-  | boolean
-  | string
-  | {
-      label?: string
-      link?: string
-    }
-
+// Just to simplify type checking when updating the frontmatter,
 interface StarlightFrontmatteHero {
-  actions?: { link: string }[]
+  image?: {
+    file?: string
+    dark?: string
+    light?: string
+  }
 }
 
 export type StarlightUserConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']

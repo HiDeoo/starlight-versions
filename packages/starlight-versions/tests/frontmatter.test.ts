@@ -2,15 +2,7 @@ import { describe, expect, test } from 'vitest'
 
 import { transformMarkdown, type TransformContext } from '../libs/markdown'
 
-const context: TransformContext = {
-  assets: [],
-  slug: 'test',
-  url: new URL('src/content/docs/test.md', import.meta.url),
-  version: {
-    slug: '2.0.1',
-    redirect: 'same-page',
-  },
-}
+import { expectVersionAssetToMatch, expectVersionAssetsToHaveLength } from './utils'
 
 describe('transformMarkdown', () => {
   test('adds versioned slug', async () => {
@@ -23,7 +15,7 @@ head:
 ---
 
 Test`,
-      context,
+      getTestContext(),
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -50,7 +42,7 @@ head:
 ---
 
 Test`,
-      { ...context, slug: '/' },
+      { ...getTestContext(), slug: '/' },
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -78,7 +70,7 @@ slug: custom
 ---
 
 Test`,
-      context,
+      getTestContext(),
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -106,7 +98,7 @@ next:
 ---
 
 Test`,
-      context,
+      getTestContext(),
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -137,7 +129,7 @@ hero:
 ---
 
 Test`,
-      context,
+      getTestContext(),
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -156,4 +148,85 @@ Test`,
       "
     `)
   })
+
+  test('updates hero file image', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+hero:
+  image:
+    file: ../../assets/test1.png
+    dark: ~/assets/test2.png
+    light: ~/assets/test3.png
+---
+
+Test`,
+      getTestContext(),
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "---
+      title: Test
+      hero:
+        image:
+          file: ../../../assets/2.0.1/test1.png
+          dark: ~/assets/test2.png
+          light: ~/assets/test3.png
+      slug: 2.0.1/test
+      ---
+
+      Test
+      "
+    `)
+
+    expectVersionAssetsToHaveLength(result.assets, 1)
+    expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\.1\/test1\.png$/)
+  })
+
+  test('updates hero dark/light images', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+hero:
+  image:
+    file: ~/assets/test1.png
+    dark: ../../assets/test2.png
+    light: ../../assets/test3.png
+---
+
+Test`,
+      getTestContext(),
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "---
+      title: Test
+      hero:
+        image:
+          file: ~/assets/test1.png
+          dark: ../../../assets/2.0.1/test2.png
+          light: ../../../assets/2.0.1/test3.png
+      slug: 2.0.1/test
+      ---
+
+      Test
+      "
+    `)
+
+    expectVersionAssetsToHaveLength(result.assets, 2)
+    expectVersionAssetToMatch(result.assets?.[0], /\/test2\.png$/, /\/2\.0\.1\/test2\.png$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/test3\.png$/, /\/2\.0\.1\/test3\.png$/)
+  })
 })
+
+function getTestContext(): TransformContext {
+  return {
+    assets: [],
+    slug: 'test',
+    url: new URL('src/content/docs/test.md', import.meta.url),
+    version: {
+      slug: '2.0.1',
+      redirect: 'same-page',
+    },
+  }
+}

@@ -69,13 +69,6 @@ export function remarkStarlightVersions() {
   }
 }
 
-// TODO(HiDeoo) frontmatter
-// TODO(HiDeoo)  - hero
-// TODO(HiDeoo)     - image
-// TODO(HiDeoo)         - file
-// TODO(HiDeoo)         - dark
-// TODO(HiDeoo)         - light
-
 function handleFrontmatter(tree: Root, file: VFile) {
   // The frontmatter is always at the root of the tree.
   for (const node of tree.children) {
@@ -89,11 +82,11 @@ function handleFrontmatter(tree: Root, file: VFile) {
       stripTrailingSlash(`${file.data.version?.slug}/${stripTrailingSlash(frontmatter.slug ?? file.data.slug ?? '')}`),
     )
 
-    if (typeof frontmatter.prev === 'object' && frontmatter.prev.link.startsWith('/')) {
+    if (typeof frontmatter.prev === 'object' && frontmatter.prev.link?.startsWith('/')) {
       frontmatter.prev.link = addVersionToLink(frontmatter.prev.link, file)
     }
 
-    if (typeof frontmatter.next === 'object' && frontmatter.next.link.startsWith('/')) {
+    if (typeof frontmatter.next === 'object' && frontmatter.next.link?.startsWith('/')) {
       frontmatter.next.link = addVersionToLink(frontmatter.next.link, file)
     }
 
@@ -102,6 +95,18 @@ function handleFrontmatter(tree: Root, file: VFile) {
         if (action.link.startsWith('/')) {
           action.link = addVersionToLink(action.link, file)
         }
+      }
+    }
+
+    if (frontmatter.hero?.image) {
+      if (frontmatter.hero.image.file?.startsWith('../')) {
+        frontmatter.hero.image.file = addVersionToAstroAsset(frontmatter.hero.image.file, file)
+      }
+      if (frontmatter.hero.image.dark?.startsWith('../')) {
+        frontmatter.hero.image.dark = addVersionToAstroAsset(frontmatter.hero.image.dark, file)
+      }
+      if (frontmatter.hero.image.light?.startsWith('../')) {
+        frontmatter.hero.image.light = addVersionToAstroAsset(frontmatter.hero.image.light, file)
       }
     }
 
