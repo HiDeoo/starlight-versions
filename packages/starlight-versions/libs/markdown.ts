@@ -16,6 +16,8 @@ import type { Version, VersionAsset } from './versions'
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
 
+const mediaElements = new Set(['img', 'source', 'Image', 'audio'])
+
 const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
@@ -48,8 +50,8 @@ export function remarkStarlightVersions() {
           return handleImports(node, file)
         }
         case 'mdxJsxFlowElement': {
-          if (node.name === 'img' || node.name === 'source' || node.name === 'Image') {
-            return handleImageElements(node, file)
+          if (node.name && mediaElements.has(node.name)) {
+            return handleMediaElements(node, file)
           }
 
           return CONTINUE
@@ -87,7 +89,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
 }
 
 function handleLinks(node: Link, file: VFile) {
-  if (!node.url.startsWith('/')) return SKIP
+  if (!isPublicAsset(node.url)) return SKIP
 
   node.url = addVersionToLink(node.url, file.data.version)
 
@@ -97,7 +99,7 @@ function handleLinks(node: Link, file: VFile) {
 function handleLinkElements(node: MdxJsxTextElement, file: VFile) {
   const href = node.attributes.find((attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'href')
 
-  if (!href || typeof href.value !== 'string' || !href.value.startsWith('/')) return CONTINUE
+  if (!href || typeof href.value !== 'string' || !isPublicAsset(href.value)) return CONTINUE
 
   href.value = addVersionToLink(href.value, file.data.version)
 
@@ -107,25 +109,19 @@ function handleLinkElements(node: MdxJsxTextElement, file: VFile) {
 function handleImages(node: Image, file: VFile) {
   if (isAbsoluteLink(node.url)) return SKIP
 
-  const isPublicAsset = node.url.startsWith('/')
-
-  const { source, dest, url } = (isPublicAsset ? addVersionToPublicAsset : addVersionToAstroAsset)(node.url, file)
-  node.url = url
-  file.data.assets?.push({ source, dest })
+  node.url = (isPublicAsset(node.url) ? addVersionToPublicAsset : addVersionToAstroAsset)(node.url, file)
 
   return SKIP
 }
 
-function handleImageElements(node: MdxJsxFlowElement, file: VFile) {
+function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
   const srcOrSrcset = node.attributes.find(
     (attribute) => attribute.type === 'mdxJsxAttribute' && (attribute.name === 'src' || attribute.name === 'srcset'),
   )
 
-  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string' || !srcOrSrcset.value.startsWith('/')) return SKIP
+  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string' || !isPublicAsset(srcOrSrcset.value)) return CONTINUE
 
-  const { source, dest, url } = addVersionToPublicAsset(srcOrSrcset.value, file)
-  srcOrSrcset.value = url
-  file.data.assets?.push({ source, dest })
+  srcOrSrcset.value = addVersionToPublicAsset(srcOrSrcset.value, file)
 
   return SKIP
 }
@@ -135,9 +131,7 @@ function handleImports(node: MdxjsEsm, file: VFile) {
     if (!importPath.startsWith('../')) return match
 
     if (isAstroAsset(importPath)) {
-      const { source, dest, url } = addVersionToAstroAsset(importPath, file)
-      file.data.assets?.push({ source, dest })
-      return `${start}${url}${end}`
+      return `${start}${addVersionToAstroAsset(importPath, file)}${end}`
     }
 
     return `${start}../${importPath}${end}`
@@ -163,11 +157,11 @@ function addVersionToAstroAsset(asset: string, file: VFile) {
   const segments = asset.split('/')
   segments.splice(-1, 0, file.data.version.slug)
 
-  const dest = new URL(segments.join('/'), file.data.url)
+  addVersionAsset(file, { source, dest: new URL(segments.join('/'), file.data.url) })
 
   segments.splice(0, 0, '..')
 
-  return { source, dest, url: segments.join('/') }
+  return segments.join('/')
 }
 
 function addVersionToPublicAsset(asset: string, file: VFile) {
@@ -178,13 +172,21 @@ function addVersionToPublicAsset(asset: string, file: VFile) {
   const segments = asset.split('/')
   segments.splice(-1, 0, file.data.version.slug)
 
-  const dest = new URL(segments.join('/'), file.data.url)
+  addVersionAsset(file, { source, dest: new URL(segments.join('/'), file.data.url) })
 
-  return { source, dest, url: segments.join('/') }
+  return segments.join('/')
+}
+
+function addVersionAsset(file: VFile, asset: VersionAsset) {
+  file.data.assets?.push(asset)
 }
 
 function isAstroAsset(asset: string) {
   return astroAssetRegex.test(asset)
+}
+
+function isPublicAsset(asset: string) {
+  return asset.startsWith('/')
 }
 
 export interface TransformContext {

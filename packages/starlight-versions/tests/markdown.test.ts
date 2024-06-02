@@ -1,6 +1,7 @@
-import { describe, expect, test } from 'vitest'
+import { assert, describe, expect, test } from 'vitest'
 
 import { transformMarkdown } from '../libs/markdown'
+import type { VersionAsset } from '../libs/versions'
 
 describe('transformMarkdown', () => {
   test('preserves existing content', async () => {
@@ -86,11 +87,8 @@ console.log('Hello, world!')
 
     expect(result.assets).toHaveLength(2)
 
-    expect(result.assets?.[0]?.source.href).toMatch(/\/test\.png$/)
-    expect(result.assets?.[0]?.dest.href).toMatch(/\/2\.0\/test\.png$/)
-
-    expect(result.assets?.[1]?.source.href).toMatch(/\/src\/assets\/test\.png$/)
-    expect(result.assets?.[1]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test\.png$/)
+    expectVersionAssetToMatch(result.assets?.[0], /\/test\.png$/, /\/2\.0\/test\.png$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test\.png$/, /\/src\/assets\/2\.0\/test\.png$/)
   })
 
   test('transforms import paths and copies HTML and MDX images', async () => {
@@ -162,32 +160,54 @@ import test8 from '../../assets/test8.png';
 
     expect(result.assets).toHaveLength(8)
 
-    expect(result.assets?.[0]?.source.href).toMatch(/\/src\/assets\/test3\.png$/)
-    expect(result.assets?.[0]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test3\.png$/)
+    expectVersionAssetToMatch(result.assets?.[0], /\/src\/assets\/test3\.png$/, /\/src\/assets\/2\.0\/test3\.png$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test4\.png$/, /\/src\/assets\/2\.0\/test4\.png$/)
+    expectVersionAssetToMatch(result.assets?.[2], /\/test5\.png$/, /\/2\.0\/test5\.png$/)
+    expectVersionAssetToMatch(result.assets?.[3], /\/test6\.png$/, /\/2\.0\/test6\.png$/)
+    expectVersionAssetToMatch(result.assets?.[4], /\/test7\.png$/, /\/2\.0\/test7\.png$/)
+    expectVersionAssetToMatch(result.assets?.[5], /\/test8\.png$/, /\/2\.0\/test8\.png$/)
+    expectVersionAssetToMatch(result.assets?.[6], /\/test9\.png$/, /\/2\.0\/test9\.png$/)
+    expectVersionAssetToMatch(result.assets?.[7], /\/test10\.png$/, /\/2\.0\/test10\.png$/)
+  })
 
-    expect(result.assets?.[1]?.source.href).toMatch(/\/src\/assets\/test4\.png$/)
-    expect(result.assets?.[1]?.dest.href).toMatch(/\/src\/assets\/2\.0\/test4\.png$/)
+  test('transforms HTML audio elements', async () => {
+    const result = await transformTestMarkdown(`<audio src="https://example.com/test1.mp3"></audio>
+<audio src="/test2.mp3"></audio>
 
-    expect(result.assets?.[2]?.source.href).toMatch(/\/test5\.png$/)
-    expect(result.assets?.[2]?.dest.href).toMatch(/\/2\.0\/test5\.png$/)
+<audio>
+  <source src="https://example.com/test3.mp3" type="audio/mpeg" />
+  <source src="https://example.com/test4.ogg" type="audio/ogg" />
+</audio>
 
-    expect(result.assets?.[3]?.source.href).toMatch(/\/test6\.png$/)
-    expect(result.assets?.[3]?.dest.href).toMatch(/\/2\.0\/test6\.png$/)
+<audio>
+  <source src="/test5.mp3" type="audio/mpeg" />
+  <source src="/test6.ogg" type="audio/ogg" />
+</audio>`)
 
-    expect(result.assets?.[4]?.source.href).toMatch(/\/test7\.png$/)
-    expect(result.assets?.[4]?.dest.href).toMatch(/\/2\.0\/test7\.png$/)
+    expect(result.content).toMatchInlineSnapshot(`
+      "<audio src="https://example.com/test1.mp3" />
 
-    expect(result.assets?.[5]?.source.href).toMatch(/\/test8\.png$/)
-    expect(result.assets?.[5]?.dest.href).toMatch(/\/2\.0\/test8\.png$/)
+      <audio src="/2.0/test2.mp3" />
 
-    expect(result.assets?.[5]?.source.href).toMatch(/\/test8\.png$/)
-    expect(result.assets?.[5]?.dest.href).toMatch(/\/2\.0\/test8\.png$/)
+      <audio>
+        <source src="https://example.com/test3.mp3" type="audio/mpeg" />
 
-    expect(result.assets?.[6]?.source.href).toMatch(/\/test9\.png$/)
-    expect(result.assets?.[6]?.dest.href).toMatch(/\/2\.0\/test9\.png$/)
+        <source src="https://example.com/test4.ogg" type="audio/ogg" />
+      </audio>
 
-    expect(result.assets?.[7]?.source.href).toMatch(/\/test10\.png$/)
-    expect(result.assets?.[7]?.dest.href).toMatch(/\/2\.0\/test10\.png$/)
+      <audio>
+        <source src="/2.0/test5.mp3" type="audio/mpeg" />
+
+        <source src="/2.0/test6.ogg" type="audio/ogg" />
+      </audio>
+      "
+    `)
+
+    expect(result.assets).toHaveLength(3)
+
+    expectVersionAssetToMatch(result.assets?.[0], /\/test2\.mp3$/, /\/2\.0\/test2\.mp3$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp3$/, /\/2\.0\/test5\.mp3$/)
+    expectVersionAssetToMatch(result.assets?.[2], /\/test6\.ogg$/, /\/2\.0\/test6\.ogg$/)
   })
 })
 
@@ -206,4 +226,11 @@ async function transformTestMarkdown(markdown: string) {
     ...result,
     content: result.content.replace(/^---\n(?:.|\n)*---\n\n/, ''),
   }
+}
+
+function expectVersionAssetToMatch(asset: VersionAsset | undefined, source: RegExp, dest: RegExp) {
+  assert(asset, 'Expected an asset to be defined.')
+
+  expect(asset.source.href).toMatch(source)
+  expect(asset.dest.href).toMatch(dest)
 }
