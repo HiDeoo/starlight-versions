@@ -9,9 +9,11 @@
     ".": "./index.ts",
     "./schema": "./schema.ts",
     "./components/VersionPagination.astro": "./components/VersionPagination.astro",
+    "./components/VersionSearch.astro": "./components/VersionSearch.astro",
     "./components/VersionSelect.astro": "./components/VersionSelect.astro",
     "./components/VersionSidebar.astro": "./components/VersionSidebar.astro",
     "./overrides/Pagination.astro": "./overrides/Pagination.astro",
+    "./overrides/Search.astro": "./overrides/Search.astro",
     "./overrides/Sidebar.astro": "./overrides/Sidebar.astro",
     "./overrides/ThemeSelect.astro": "./overrides/ThemeSelect.astro",
     "./package.json": "./package.json"
@@ -21,6 +23,7 @@
     "lint": "prettier -c --cache . && eslint . --cache --max-warnings=0"
   },
   "dependencies": {
+    "@pagefind/default-ui": "^1.0.3",
     "github-slugger": "^2.0.0",
     "mdast-util-mdx-jsx": "^3.1.2",
     "mdast-util-mdxjs-esm": "^2.0.1",

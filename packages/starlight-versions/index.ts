@@ -47,6 +47,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
                 { name: 'ThemeSelect', fallback: 'VersionSelect' },
                 { name: 'Sidebar', fallback: 'VersionSidebar' },
                 { name: 'Pagination', fallback: 'VersionPagination' },
+                { name: 'Search', fallback: 'VersionSearch' },
               ],
               logger,
             ),

@@ -238,6 +238,14 @@ export function getVersionFromSlug(
   return config.versions.find((version) => version.slug === versionSegment)
 }
 
+export function getVersionFilterFromSlug(
+  config: StarlightVersionsConfig,
+  starlightConfig: StarlightConfig,
+  slug: string,
+): string {
+  return getVersionFromSlug(config, starlightConfig, slug)?.slug ?? 'current'
+}
+
 // An undefined version is valid and represents the current version.
 export function getVersionFromPaginationLink(
   config: StarlightVersionsConfig,

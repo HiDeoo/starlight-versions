@@ -9,3 +9,15 @@ declare module 'virtual:starlight/user-config' {
 
   export default StarlightConfig
 }
+
+declare module 'virtual:starlight/project-context' {
+  const ProjectContext: {
+    root: string
+    srcDir: string
+    trailingSlash: import('astro').AstroConfig['trailingSlash']
+    build: {
+      format: import('astro').AstroConfig['build']['format']
+    }
+  }
+  export default ProjectContext
+}
