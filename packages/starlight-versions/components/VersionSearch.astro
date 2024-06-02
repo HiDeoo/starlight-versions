@@ -11,7 +11,7 @@ import project from 'virtual:starlight/project-context'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
-import { getVersionFilterFromSlug } from '../libs/versions'
+import { getVersionFromSlug, getVersionIdentifier, getVersionURL } from '../libs/versions'
 
 const { entry, labels } = Astro.props
 
@@ -24,16 +24,15 @@ const pagefindTranslations = {
   ),
 }
 
-const pageVersionFilter = getVersionFilterFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
-
-// TODO(HiDeoo) Show a warning when the search is using a version that is not the current one (and maybe a link to the current version?).
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
+const pageVersionIdentifier = getVersionIdentifier(pageVersion)
 ---
 
 <site-search
   data-translations={JSON.stringify(pagefindTranslations)}
   data-strip-trailing-slash={project.trailingSlash === 'never'}
-  data-version={pageVersionFilter}
-  data-pagefind-filter={`version:${pageVersionFilter}`}
+  data-version={pageVersionIdentifier}
+  data-pagefind-filter={`version:${pageVersionIdentifier}`}
 >
   <button data-open-modal disabled>
     <Icon name="magnifier" label={labels['search.label']} />
@@ -53,7 +52,19 @@ const pageVersionFilter = getVersionFilterFromSlug(starlightVersionsConfig, star
           </div>
         ) : (
           <div class="search-container">
-            <div id="starlight__search" />
+            <div id="starlight__search">
+              {pageVersion && (
+                <div class="starlight-versions-pagefind-notice">
+                  <Icon name="seti:clock" size="1em" color="var(--sl-color-orange-high)" />
+                  <span>
+                    Search limited to {pageVersion.label ?? `the ${pageVersion.slug} version`}. Switch to the
+                    {/* prettier-ignore */}
+                    <a href={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}>latest version</a>
+                    for up-to-date results.
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         )
       }
@@ -242,6 +253,10 @@ const pageVersionFilter = getVersionFilterFromSlug(starlightVersionsConfig, star
     --pagefind-ui-border: var(--sl-color-gray-5);
     --pagefind-ui-border-width: 1px;
     --sl-search-cancel-space: 5rem;
+
+    display: flex;
+    flex-direction: column-reverse;
+    gap: calc(24px * var(--pagefind-ui-scale));
   }
 
   @media (min-width: 50rem) {
@@ -446,5 +461,26 @@ const pageVersionFilter = getVersionFilterFromSlug(starlightVersionsConfig, star
 
   #starlight__search .pagefind-ui__filter-panel {
     display: none;
+  }
+
+  .starlight-versions-pagefind-notice {
+    align-items: center;
+    background-color: var(--sl-color-orange-low);
+    border-radius: var(--sl-search-corners);
+    border: 1px solid var(--sl-color-orange);
+    color: var(--sl-color-orange-high);
+    display: flex;
+    font-size: calc(18px * var(--pagefind-ui-scale));
+    gap: 0.75em;
+    line-height: var(--sl-line-height-headings);
+    padding: 0.75em 1em;
+  }
+
+  .starlight-versions-pagefind-notice a {
+    color: var(--sl-color-orange-high);
+  }
+
+  .starlight-versions-pagefind-notice svg {
+    flex-shrink: 0;
   }
 </style>
