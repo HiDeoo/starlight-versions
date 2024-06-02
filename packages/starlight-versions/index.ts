@@ -27,8 +27,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
         if (command !== 'dev' && command !== 'build') return
 
         try {
-          // TODO(HiDeoo) logs/cli/feedback
-          await ensureNewVersion(config, starlightConfig, astroConfig.srcDir)
+          await ensureNewVersion(config, starlightConfig, astroConfig.srcDir, logger)
         } catch (error) {
           throwPluginError(
             error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',

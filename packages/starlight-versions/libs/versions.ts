@@ -1,4 +1,5 @@
 import type { StarlightConfig } from '@astrojs/starlight/types'
+import type { AstroIntegrationLogger } from 'astro'
 import { z } from 'astro/zod'
 
 import type { StarlightVersionsConfig } from '..'
@@ -37,6 +38,7 @@ export async function ensureNewVersion(
   config: StarlightVersionsConfig,
   starlightConfig: StarlightUserConfig,
   srcDir: URL,
+  logger: AstroIntegrationLogger,
 ) {
   const docsDir = new URL('content/docs/', srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
@@ -94,6 +96,8 @@ export async function ensureNewVersion(
   }
 
   await makeVersionConfig(newVersion, starlightConfig, srcDir)
+
+  logger.info(`Created new version '${newVersion.slug}'.`)
 }
 
 export async function getVersionedSidebar(
