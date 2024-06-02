@@ -3,10 +3,15 @@ import { Icon } from '@astrojs/starlight/components'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
-import { getPageSlug } from '../libs/starlight'
 import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
-const pageVersion = getVersionFromSlug(starlightVersionsConfig, getPageSlug(Astro.url))
+interface Props {
+  slug: string
+}
+
+const { slug } = Astro.props
+
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, slug)
 ---
 
 <starlight-version-select>

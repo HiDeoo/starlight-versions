@@ -5,5 +5,5 @@ import type { Props } from '@astrojs/starlight/props'
 import VersionSelect from '../components/VersionSelect.astro'
 ---
 
-<VersionSelect />
+<VersionSelect slug={Astro.props.entry.slug} />
 <Default {...Astro.props}><slot /></Default>

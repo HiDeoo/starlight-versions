@@ -187,8 +187,16 @@ export function getVersionURL(
 
 // An undefined version is valid and represents the current version.
 export function getVersionFromSlug(config: StarlightVersionsConfig, slug: string): Version | undefined {
-  // TODO(HiDeoo) Is this correct with i18n and base?
-  return config.versions.find((version) => slug === version.slug || slug.startsWith(`${version.slug}/`))
+  const segments = slug.split('/')
+
+  // TODO(HiDeoo) locale
+  // TODO(HiDeoo) make sure slug for new version are valid with i18n
+
+  const versionSlug = segments[0]
+
+  if (!versionSlug) return undefined
+
+  return config.versions.find((version) => version.slug === versionSlug)
 }
 
 // An undefined version is valid and represents the current version.

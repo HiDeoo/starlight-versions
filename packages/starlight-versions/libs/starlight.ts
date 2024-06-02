@@ -56,10 +56,6 @@ export function addPrefixToSidebarConfig(
   })
 }
 
-export function getPageSlug(url: URL) {
-  return url.pathname.replace(/^\//, '').replace(/\/$/, '')
-}
-
 type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> & {
   slug?: string
   hero?: StarlightFrontmatteHero
