@@ -16,7 +16,7 @@ import type { Version, VersionAsset } from './versions'
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
 
-const mediaElements = new Set(['img', 'source', 'Image', 'audio'])
+const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
 const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 

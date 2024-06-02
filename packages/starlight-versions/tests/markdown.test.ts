@@ -209,6 +209,46 @@ import test8 from '../../assets/test8.png';
     expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp3$/, /\/2\.0\/test5\.mp3$/)
     expectVersionAssetToMatch(result.assets?.[2], /\/test6\.ogg$/, /\/2\.0\/test6\.ogg$/)
   })
+
+  test('transforms HTML video elements', async () => {
+    const result = await transformTestMarkdown(`<video src="https://example.com/test1.mp4"></video>
+<video src="/test2.mp4"></video>
+
+<video>
+  <source src="https://example.com/test3.mp4" type="video/mp4" />
+  <source src="https://example.com/test4.webm" type="video/webm" />
+</video>
+
+<video>
+  <source src="/test5.mp4" type="video/mp4" />
+  <source src="/test6.webm" type="video/webm" />
+</video>`)
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "<video src="https://example.com/test1.mp4" />
+
+      <video src="/2.0/test2.mp4" />
+
+      <video>
+        <source src="https://example.com/test3.mp4" type="video/mp4" />
+
+        <source src="https://example.com/test4.webm" type="video/webm" />
+      </video>
+
+      <video>
+        <source src="/2.0/test5.mp4" type="video/mp4" />
+
+        <source src="/2.0/test6.webm" type="video/webm" />
+      </video>
+      "
+    `)
+
+    expect(result.assets).toHaveLength(3)
+
+    expectVersionAssetToMatch(result.assets?.[0], /\/test2\.mp4$/, /\/2\.0\/test2\.mp4$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp4$/, /\/2\.0\/test5\.mp4$/)
+    expectVersionAssetToMatch(result.assets?.[2], /\/test6\.webm$/, /\/2\.0\/test6\.webm$/)
+  })
 })
 
 async function transformTestMarkdown(markdown: string) {
