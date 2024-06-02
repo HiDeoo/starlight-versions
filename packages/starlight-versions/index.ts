@@ -8,7 +8,6 @@ import { vitePluginStarlightVersions } from './libs/vite'
 export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './libs/config'
 
 // TODO(HiDeoo) docs: aside early prototype
-// TODO(HiDeoo) outdated version notice (notice on splash page)
 
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
   const parsedConfig = StarlightVersionsConfigSchema.safeParse(userConfig)
@@ -47,6 +46,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
                 { name: 'Sidebar', fallback: 'VersionSidebar' },
                 { name: 'Pagination', fallback: 'VersionPagination' },
                 { name: 'Search', fallback: 'VersionSearch' },
+                { name: 'PageTitle', fallback: 'VersionNotice' },
               ],
               logger,
             ),

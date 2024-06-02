@@ -8,10 +8,12 @@
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema.ts",
+    "./components/VersionNotice.astro": "./components/VersionNotice.astro",
     "./components/VersionPagination.astro": "./components/VersionPagination.astro",
     "./components/VersionSearch.astro": "./components/VersionSearch.astro",
     "./components/VersionSelect.astro": "./components/VersionSelect.astro",
     "./components/VersionSidebar.astro": "./components/VersionSidebar.astro",
+    "./overrides/PageTitle.astro": "./overrides/PageTitle.astro",
     "./overrides/Pagination.astro": "./overrides/Pagination.astro",
     "./overrides/Search.astro": "./overrides/Search.astro",
     "./overrides/Sidebar.astro": "./overrides/Sidebar.astro",

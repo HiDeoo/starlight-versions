@@ -1,0 +1,48 @@
+---
+import { Icon } from '@astrojs/starlight/components'
+import type { Props } from '@astrojs/starlight/props'
+import starlightConfig from 'virtual:starlight/user-config'
+import starlightVersionsConfig from 'virtual:starlight-versions-config'
+
+import { getVersionFromSlug, getVersionURL } from '../libs/versions'
+
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, Astro.props.entry.slug)
+---
+
+{
+  pageVersion && (
+    <p>
+      <Icon name="seti:clock" size="1em" color="var(--sl-color-orange-high)" />
+      <span>
+        This content is for {pageVersion.label ?? `the ${pageVersion.slug} version`}. Switch to the
+        {/* prettier-ignore */}
+        <a href={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}>latest version</a>
+        for up-to-date documentation.
+      </span>
+    </p>
+  )
+}
+
+<style>
+  p {
+    display: flex;
+    border: 1px solid var(--sl-color-orange);
+    padding: 0.75em 1em;
+    background-color: var(--sl-color-orange-low);
+    color: var(--sl-color-orange-high);
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.75em;
+    font-size: var(--sl-text-sm);
+    line-height: var(--sl-line-height-headings);
+  }
+
+  p a {
+    color: var(--sl-color-orange-high);
+  }
+
+  p :global(svg) {
+    flex-shrink: 0;
+  }
+</style>
