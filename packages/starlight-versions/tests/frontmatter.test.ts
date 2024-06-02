@@ -123,4 +123,37 @@ Test`,
       "
     `)
   })
+
+  test('updates hero action links', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+hero:
+  actions:
+    - text: Test 1
+      link: /test1/
+    - text: Test 2
+      link: https://example.com/
+---
+
+Test`,
+      context,
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "---
+      title: Test
+      hero:
+        actions:
+          - text: Test 1
+            link: /2.0.1/test1/
+          - text: Test 2
+            link: https://example.com/
+      slug: 2.0.1/test
+      ---
+
+      Test
+      "
+    `)
+  })
 })

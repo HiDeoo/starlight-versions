@@ -75,7 +75,6 @@ export function remarkStarlightVersions() {
 // TODO(HiDeoo)         - file
 // TODO(HiDeoo)         - dark
 // TODO(HiDeoo)         - light
-// TODO(HiDeoo)     - actions => link
 
 function handleFrontmatter(tree: Root, file: VFile) {
   // The frontmatter is always at the root of the tree.
@@ -96,6 +95,14 @@ function handleFrontmatter(tree: Root, file: VFile) {
 
     if (typeof frontmatter.next === 'object' && frontmatter.next.link.startsWith('/')) {
       frontmatter.next.link = addVersionToLink(frontmatter.next.link, file)
+    }
+
+    if (frontmatter.hero?.actions) {
+      for (const action of frontmatter.hero.actions) {
+        if (action.link.startsWith('/')) {
+          action.link = addVersionToLink(action.link, file)
+        }
+      }
     }
 
     node.value = getFrontmatterNodeValue(frontmatter)

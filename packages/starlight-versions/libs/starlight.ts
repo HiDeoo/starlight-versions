@@ -61,9 +61,10 @@ export function getPageSlug(url: URL) {
 }
 
 type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> & {
-  slug?: string
+  hero?: StarlightFrontmatteHero
   next?: StarlightFrontmatterPrevNextLink
   prev?: StarlightFrontmatterPrevNextLink
+  slug?: string
 }
 
 type StarlightFrontmatterPrevNextLink =
@@ -73,6 +74,10 @@ type StarlightFrontmatterPrevNextLink =
       label?: string
       link?: string
     }
+
+interface StarlightFrontmatteHero {
+  actions?: { link: string }[]
+}
 
 export type StarlightUserConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']
 export type StarlightSidebarUserConfig = StarlightUserConfig['sidebar']
