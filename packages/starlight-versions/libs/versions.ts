@@ -187,7 +187,33 @@ export function getVersionURL(
 
 // An undefined version is valid and represents the current version.
 export function getVersionFromSlug(config: StarlightVersionsConfig, slug: string): Version | undefined {
+  // TODO(HiDeoo) Is this correct with i18n and base?
   return config.versions.find((version) => slug === version.slug || slug.startsWith(`${version.slug}/`))
+}
+
+// An undefined version is valid and represents the current version.
+export function getVersionFromPaginationLink(
+  config: StarlightVersionsConfig,
+  link: string,
+  locale: string | undefined,
+): Version | undefined {
+  const [, ...segments] = link.split('/')
+
+  if (import.meta.env.BASE_URL !== '/') {
+    // Remove the base segment if configured.
+    segments.splice(0, 1)
+  }
+
+  if (locale) {
+    // Remove the locale segment if the current locale is not a root locale.
+    segments.splice(0, 1)
+  }
+
+  const versionSlug = segments[0]
+
+  if (!versionSlug) return undefined
+
+  return config.versions.find((version) => version.slug === versionSlug)
 }
 
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {

@@ -8,8 +8,10 @@
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema.ts",
+    "./components/VersionPagination.astro": "./components/VersionPagination.astro",
     "./components/VersionSelect.astro": "./components/VersionSelect.astro",
     "./components/VersionSidebar.astro": "./components/VersionSidebar.astro",
+    "./overrides/Pagination.astro": "./overrides/Pagination.astro",
     "./overrides/Sidebar.astro": "./overrides/Sidebar.astro",
     "./overrides/ThemeSelect.astro": "./overrides/ThemeSelect.astro",
     "./package.json": "./package.json"

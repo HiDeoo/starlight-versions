@@ -4,7 +4,7 @@ import type { StarlightConfig, StarlightUserConfig } from '@astrojs/starlight/ty
 import { describe, expect, test, vi } from 'vitest'
 
 import { StarlightVersionsConfigSchema, type StarlightVersionsConfig } from '../libs/config'
-import { getVersionFromSlug, getVersionURL, type Version } from '../libs/versions'
+import { getVersionFromPaginationLink, getVersionFromSlug, getVersionURL, type Version } from '../libs/versions'
 
 describe('getVersionFromSlug', () => {
   test('returns undefined for the current version', () => {
@@ -51,6 +51,92 @@ describe('getVersionFromSlug', () => {
         expectedSlug,
       ),
     ).toStrictEqual(expectedVersion)
+  })
+})
+
+describe('getVersionFromPaginationLink', () => {
+  test('returns undefined for the current version', () => {
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('5.0')] }),
+        '/guides/example/',
+        undefined,
+      ),
+    ).toBeUndefined()
+  })
+
+  test('returns undefined for a non-existing version', () => {
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('4.0')] }),
+        '/5.0/guides/example',
+        undefined,
+      ),
+    ).toBeUndefined()
+  })
+
+  test('returns the version for an existing version', () => {
+    const expectedSlug = '3.0'
+    const expectedVersion = createTestVersion(expectedSlug)
+
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({
+          versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
+        }),
+        `/${expectedSlug}/guides/example`,
+        undefined,
+      ),
+    ).toStrictEqual(expectedVersion)
+  })
+
+  test('returns the version for an existing version index route', () => {
+    const expectedSlug = '3.0'
+    const expectedVersion = createTestVersion(expectedSlug)
+
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({
+          versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
+        }),
+        `/${expectedSlug}/`,
+        undefined,
+      ),
+    ).toStrictEqual(expectedVersion)
+  })
+
+  test('returns the version for an existing version with a non root locale', () => {
+    const expectedSlug = '3.0'
+    const expectedVersion = createTestVersion(expectedSlug)
+
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({
+          versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
+        }),
+        `/fr/${expectedSlug}/`,
+        'fr',
+      ),
+    ).toStrictEqual(expectedVersion)
+  })
+
+  test('returns the version for an existing version with a base', () => {
+    const expectedSlug = '3.0'
+    const expectedVersion = createTestVersion(expectedSlug)
+
+    vi.stubEnv('BASE_URL', '/test')
+
+    expect(
+      getVersionFromPaginationLink(
+        StarlightVersionsConfigSchema.parse({
+          versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
+        }),
+        `/test/${expectedSlug}/`,
+        undefined,
+      ),
+    ).toStrictEqual(expectedVersion)
+
+    vi.unstubAllEnvs()
   })
 })
 
