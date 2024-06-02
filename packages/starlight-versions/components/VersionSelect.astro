@@ -11,7 +11,7 @@ interface Props {
 
 const { slug } = Astro.props
 
-const pageVersion = getVersionFromSlug(starlightVersionsConfig, slug)
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, slug)
 ---
 
 <starlight-version-select>

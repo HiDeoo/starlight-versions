@@ -24,6 +24,18 @@ export function getDocSlug(docsDir: URL, doc: URL) {
   return slug === 'index' ? '/' : slug.replace(/\/index$/, '')
 }
 
+export function getDocLocale(slug: string, starlightConfig: StarlightUserConfig): string | undefined {
+  const locales = Object.keys(starlightConfig.locales ?? {})
+
+  if (locales.length === 0) return undefined
+
+  const localeSegment = slug.split('/')[0]
+
+  if (!localeSegment) return undefined
+
+  return locales.find((locale) => locale === localeSegment)
+}
+
 export function addPrefixToSidebarConfig(
   prefix: string,
   sidebar: NonNullable<StarlightSidebarUserConfig>,

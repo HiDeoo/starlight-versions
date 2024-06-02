@@ -7,10 +7,20 @@ import { StarlightVersionsConfigSchema, type StarlightVersionsConfig } from '../
 import { getVersionFromPaginationLink, getVersionFromSlug, getVersionURL, type Version } from '../libs/versions'
 
 describe('getVersionFromSlug', () => {
+  const starlightBasicConfig = createTestStarlightConfig({ title: 'basics' })
+  const starlightI18nConfig = createTestStarlightConfig({
+    title: 'i18n',
+    locales: {
+      root: { label: 'English', lang: 'en-US' },
+      fr: { label: 'French' },
+    },
+  })
+
   test('returns undefined for the current version', () => {
     expect(
       getVersionFromSlug(
         StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('5.0')] }),
+        starlightBasicConfig,
         'guides/example',
       ),
     ).toBeUndefined()
@@ -20,6 +30,7 @@ describe('getVersionFromSlug', () => {
     expect(
       getVersionFromSlug(
         StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('4.0')] }),
+        starlightBasicConfig,
         '5.0/guides/example',
       ),
     ).toBeUndefined()
@@ -34,6 +45,7 @@ describe('getVersionFromSlug', () => {
         StarlightVersionsConfigSchema.parse({
           versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
         }),
+        starlightBasicConfig,
         `${expectedSlug}/guides/example`,
       ),
     ).toStrictEqual(expectedVersion)
@@ -48,7 +60,33 @@ describe('getVersionFromSlug', () => {
         StarlightVersionsConfigSchema.parse({
           versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
         }),
+        starlightBasicConfig,
         expectedSlug,
+      ),
+    ).toStrictEqual(expectedVersion)
+  })
+
+  test('returns undefined for the current version for a specific locale', () => {
+    expect(
+      getVersionFromSlug(
+        StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('5.0')] }),
+        starlightI18nConfig,
+        'fr/guides/example',
+      ),
+    ).toBeUndefined()
+  })
+
+  test('returns the version for an existing version and a specific locale', () => {
+    const expectedSlug = '3.0'
+    const expectedVersion = createTestVersion(expectedSlug)
+
+    expect(
+      getVersionFromSlug(
+        StarlightVersionsConfigSchema.parse({
+          versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
+        }),
+        starlightI18nConfig,
+        `fr/${expectedSlug}/guides/example`,
       ),
     ).toStrictEqual(expectedVersion)
   })

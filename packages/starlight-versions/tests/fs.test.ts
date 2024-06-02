@@ -6,7 +6,7 @@ import url from 'node:url'
 import glob from 'fast-glob'
 import { describe, expect, test, vi } from 'vitest'
 
-import { copyDirectory } from '../libs/fs'
+import { copyDirectory, type CopyDirectoryCallback } from '../libs/fs'
 import { ensureTrailingSlash } from '../libs/path'
 
 describe('copyDirectory', () => {
@@ -80,9 +80,13 @@ describe('copyDirectory', () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
-    const callback: Parameters<typeof copyDirectory>[2] = vi.fn((entry) =>
-      Promise.resolve(entry.type === 'directory' && entry.name === 'nested'),
-    )
+    const callback: CopyDirectoryCallback = vi.fn((entry) => {
+      if (entry.type === 'directory') {
+        return Promise.resolve(entry.name === 'nested')
+      }
+
+      return Promise.resolve('')
+    })
 
     await copyDirectory(source, dest, callback)
 
@@ -92,29 +96,72 @@ describe('copyDirectory', () => {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     expect(callback).toHaveBeenCalledTimes(6)
-    expect(callback).toHaveBeenNthCalledWith(1, { type: 'directory', name: 'dir', isRoot: true })
-    expect(callback).toHaveBeenNthCalledWith(2, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.mdx$/) }),
-    })
-    expect(callback).toHaveBeenNthCalledWith(3, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
-    })
-    expect(callback).toHaveBeenNthCalledWith(4, { type: 'directory', name: 'nested', isRoot: false })
-    expect(callback).toHaveBeenNthCalledWith(5, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
-    })
-    expect(callback).toHaveBeenNthCalledWith(6, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
-    })
+    expect(callback).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: 'directory', name: 'dir', isRoot: true }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: 'directory', name: 'dir', isRoot: true }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.mdx$/) }),
+      }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+      }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      4,
+      expect.objectContaining({ type: 'directory', name: 'nested', isRoot: false }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      5,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
+      }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      6,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+      }),
+    )
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+
+    await fs.rm(dest, { recursive: true })
+  })
+
+  test('uses the callback to change the destination of directories to copy', async () => {
+    const source = getFixtureURL('basics')
+    const dest = await makeTempDir()
+
+    const callback: CopyDirectoryCallback = vi.fn((entry) => {
+      if (entry.type === 'directory') {
+        return Promise.resolve(new URL('test/', dest))
+      }
+
+      return Promise.resolve('')
+    })
+
+    await copyDirectory(source, dest, callback)
+
+    expect(await getDirEntries(dest)).toEqual(
+      expect.arrayContaining(['index.md', 'hello.md', 'test/index.md', 'test/hello.mdx']),
+    )
 
     await fs.rm(dest, { recursive: true })
   })
@@ -123,7 +170,7 @@ describe('copyDirectory', () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
-    const callback: Parameters<typeof copyDirectory>[2] = vi.fn((entry) =>
+    const callback: CopyDirectoryCallback = vi.fn((entry) =>
       Promise.resolve(entry.type === 'file' ? 'updated content' : true),
     )
 
@@ -131,17 +178,26 @@ describe('copyDirectory', () => {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     expect(callback).toHaveBeenCalledTimes(3)
-    expect(callback).toHaveBeenNthCalledWith(1, { type: 'directory', name: 'dir', isRoot: true })
-    expect(callback).toHaveBeenNthCalledWith(2, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
-    })
-    expect(callback).toHaveBeenNthCalledWith(3, {
-      type: 'file',
-      content: expect.any(String),
-      url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
-    })
+    expect(callback).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: 'directory', name: 'dir', isRoot: true }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
+      }),
+    )
+    expect(callback).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        type: 'file',
+        content: expect.any(String),
+        url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
+      }),
+    )
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
     expect(await fs.readFile(new URL('hello.md', dest), 'utf8')).toEqual('updated content')
@@ -151,8 +207,8 @@ describe('copyDirectory', () => {
   })
 })
 
-function copyAllCallback() {
-  return Promise.resolve(false)
+const copyAllCallback: CopyDirectoryCallback = (entry) => {
+  return Promise.resolve(entry.type === 'directory' ? false : '')
 }
 
 async function makeTempDir() {

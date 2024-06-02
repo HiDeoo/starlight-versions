@@ -21,10 +21,11 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
   for (const entry of dirEntries) {
     if (entry.isDirectory()) {
       const source = new URL(ensureTrailingSlash(entry.name), sourceDir)
-      const dest = new URL(ensureTrailingSlash(entry.name), destDir)
+      let dest = new URL(ensureTrailingSlash(entry.name), destDir)
 
-      const skipDir = await callback({ type: 'directory', name: entry.name, isRoot })
-      if (skipDir) continue
+      const skipOrDest = await callback({ type: 'directory', name: entry.name, isRoot, dest, source })
+      if (skipOrDest === true) continue
+      if (skipOrDest instanceof URL) dest = skipOrDest
 
       await ensureDirectory(dest)
       await copyDirectory(source, dest, callback, false)
@@ -34,7 +35,9 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
 
       const updatedContent = await callback({ type: 'file', content, url: source })
 
-      await fs.writeFile(new URL(entry.name, destDir), `${updatedContent}`)
+      if (typeof updatedContent !== 'string') continue
+
+      await fs.writeFile(new URL(entry.name, destDir), updatedContent)
     }
   }
 }
@@ -57,6 +60,8 @@ export function ensureDirectory(directory: PathLike) {
   return fs.mkdir(directory, { recursive: true })
 }
 
-type CopyDirectoryCallback = (
-  entry: { type: 'file'; content: string; url: URL } | { type: 'directory'; name: string; isRoot: boolean },
-) => Promise<string | boolean>
+export type CopyDirectoryCallback = (
+  entry:
+    | { type: 'file'; content: string; url: URL }
+    | { type: 'directory'; name: string; isRoot: boolean; source: URL; dest: URL },
+) => Promise<string | boolean | URL>

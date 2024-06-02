@@ -5,7 +5,7 @@ import { transformMarkdown, type TransformContext } from '../libs/markdown'
 import { expectVersionAssetToMatch, expectVersionAssetsToHaveLength } from './utils'
 
 describe('transformMarkdown', () => {
-  test('adds versioned slug', async () => {
+  test('adds versioned slug and preserves existing frontmatter', async () => {
     const result = await transformMarkdown(
       `---
 title: Test
@@ -36,9 +36,6 @@ Test`,
     const result = await transformMarkdown(
       `---
 title: Test
-head:
-  - tag: title
-    content: Starlight Versions
 ---
 
 Test`,
@@ -48,10 +45,28 @@ Test`,
     expect(result.content).toMatchInlineSnapshot(`
       "---
       title: Test
-      head:
-        - tag: title
-          content: Starlight Versions
       slug: 2.0.1
+      ---
+
+      Test
+      "
+    `)
+  })
+
+  test('adds versioned slug for a specific locale', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+---
+
+Test`,
+      { ...getTestContext(), locale: 'fr', slug: 'fr/test' },
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "---
+      title: Test
+      slug: fr/2.0.1/test
       ---
 
       Test
@@ -63,9 +78,6 @@ Test`,
     const result = await transformMarkdown(
       `---
 title: Test
-head:
-  - tag: title
-    content: Starlight Versions
 slug: custom
 ---
 
@@ -76,9 +88,6 @@ Test`,
     expect(result.content).toMatchInlineSnapshot(`
       "---
       title: Test
-      head:
-        - tag: title
-          content: Starlight Versions
       slug: 2.0.1/custom
       ---
 
@@ -222,6 +231,7 @@ Test`,
 function getTestContext(): TransformContext {
   return {
     assets: [],
+    locale: undefined,
     slug: 'test',
     url: new URL('src/content/docs/test.md', import.meta.url),
     version: {

@@ -78,9 +78,25 @@ function handleFrontmatter(tree: Root, file: VFile) {
 
     const frontmatter = parseFrontmatter(node.value)
 
-    frontmatter.slug = stripLeadingSlash(
-      stripTrailingSlash(`${file.data.version?.slug}/${stripTrailingSlash(frontmatter.slug ?? file.data.slug ?? '')}`),
-    )
+    if (frontmatter.slug) {
+      frontmatter.slug = stripLeadingSlash(
+        stripTrailingSlash(`${file.data.version?.slug}/${stripTrailingSlash(frontmatter.slug)}`),
+      )
+    } else if (file.data.slug && file.data.version) {
+      if (file.data.slug === '/') {
+        frontmatter.slug = file.data.version.slug
+      } else {
+        const segments = file.data.slug.split('/')
+
+        if (file.data.locale && segments[0] === file.data.locale) {
+          segments.splice(1, 0, file.data.version.slug)
+        } else {
+          segments.splice(0, 0, file.data.version.slug)
+        }
+
+        frontmatter.slug = segments.join('/')
+      }
+    }
 
     if (typeof frontmatter.prev === 'object' && frontmatter.prev.link?.startsWith('/')) {
       frontmatter.prev.link = addVersionToLink(frontmatter.prev.link, file)
@@ -219,6 +235,7 @@ function isPublicAsset(asset: string) {
 
 export interface TransformContext {
   assets: VersionAsset[]
+  locale: string | undefined
   slug: string
   url: URL
   version: Version

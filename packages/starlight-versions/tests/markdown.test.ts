@@ -255,6 +255,7 @@ import test8 from '../../assets/test8.png';
 async function transformTestMarkdown(markdown: string) {
   const result = await transformMarkdown(markdown, {
     assets: [],
+    locale: undefined,
     slug: 'test',
     url: new URL('src/content/docs/test.md', import.meta.url),
     version: {

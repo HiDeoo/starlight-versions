@@ -14,6 +14,7 @@ import {
   type StarlightUserConfig,
   addPrefixToSidebarConfig,
   type StarlightSidebar,
+  getDocLocale,
 } from './starlight'
 
 const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionSidebarGroupLabel')
@@ -39,6 +40,7 @@ export async function ensureNewVersion(
 ) {
   const docsDir = new URL('content/docs/', srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
+  const locales = Object.keys(starlightConfig.locales ?? {})
 
   if (!newVersion) return
 
@@ -46,12 +48,38 @@ export async function ensureNewVersion(
 
   await copyDirectory(docsDir, new URL(ensureTrailingSlash(newVersion.slug), docsDir), async (entry) => {
     if (entry.type === 'directory') {
-      return entry.isRoot && entry.name in config.versionsBySlug
+      if (!entry.isRoot) {
+        const segments = entry.source.pathname.split('/')
+        const lastSegment = segments.at(-2)
+        const secondLastSegment = segments.at(-3)
+
+        if (secondLastSegment && lastSegment === newVersion.slug && locales.includes(secondLastSegment)) {
+          // Skip version directories in a locale directory.
+          return true
+        }
+
+        // Do not skip other non-root directories.
+        return false
+      }
+
+      // Skip root version directories.
+      if (entry.name in config.versionsBySlug) return true
+
+      const localeDir = locales.find((locale) => locale === entry.name)
+
+      // Copy root directories not matching any locale.
+      if (!localeDir) return false
+
+      // Otherwise, swap the locale and version directories.
+      return new URL(`../../${localeDir}/${newVersion.slug}/`, entry.dest)
     }
+
+    const slug = getDocSlug(docsDir, entry.url)
 
     const md = await transformMarkdown(entry.content, {
       assets: [],
-      slug: getDocSlug(docsDir, entry.url),
+      locale: getDocLocale(slug, starlightConfig),
+      slug,
       url: entry.url,
       version: newVersion,
     })
@@ -186,17 +214,28 @@ export function getVersionURL(
 }
 
 // An undefined version is valid and represents the current version.
-export function getVersionFromSlug(config: StarlightVersionsConfig, slug: string): Version | undefined {
+export function getVersionFromSlug(
+  config: StarlightVersionsConfig,
+  starlightConfig: StarlightConfig,
+  slug: string,
+): Version | undefined {
   const segments = slug.split('/')
 
-  // TODO(HiDeoo) locale
-  // TODO(HiDeoo) make sure slug for new version are valid with i18n
+  const versionOrLocaleSegment = segments[0]
 
-  const versionSlug = segments[0]
+  if (!versionOrLocaleSegment) return undefined
 
-  if (!versionSlug) return undefined
+  const version = config.versions.find((version) => version.slug === versionOrLocaleSegment)
 
-  return config.versions.find((version) => version.slug === versionSlug)
+  if (version) return version
+
+  const locales = Object.keys(starlightConfig.locales ?? {})
+
+  if (!locales.includes(versionOrLocaleSegment)) return undefined
+
+  const versionSegment = segments[1]
+
+  return config.versions.find((version) => version.slug === versionSegment)
 }
 
 // An undefined version is valid and represents the current version.
@@ -217,11 +256,11 @@ export function getVersionFromPaginationLink(
     segments.splice(0, 1)
   }
 
-  const versionSlug = segments[0]
+  const versionSegment = segments[0]
 
-  if (!versionSlug) return undefined
+  if (!versionSegment) return undefined
 
-  return config.versions.find((version) => version.slug === versionSlug)
+  return config.versions.find((version) => version.slug === versionSegment)
 }
 
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {

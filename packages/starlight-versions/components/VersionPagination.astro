@@ -1,6 +1,7 @@
 ---
 import Default from '@astrojs/starlight/components/Pagination.astro'
 import type { Props } from '@astrojs/starlight/props'
+import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromPaginationLink, getVersionFromSlug } from '../libs/versions'
@@ -21,13 +22,13 @@ function getPaginationLink(currentVersion: Version | undefined, link: Pagination
     : undefined
 }
 
-const currentVersion = getVersionFromSlug(starlightVersionsConfig, entry.slug)
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
 ---
 
 <Default
   {...Astro.props}
   pagination={{
-    prev: getPaginationLink(currentVersion, pagination.prev),
-    next: getPaginationLink(currentVersion, pagination.next),
+    prev: getPaginationLink(pageVersion, pagination.prev),
+    next: getPaginationLink(pageVersion, pagination.next),
   }}><slot /></Default
 >
