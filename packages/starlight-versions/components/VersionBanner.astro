@@ -1,0 +1,38 @@
+---
+import type { Props } from '@astrojs/starlight/props'
+import starlightConfig from 'virtual:starlight/user-config'
+import starlightVersionsConfig from 'virtual:starlight-versions-config'
+
+import { getVersionFromSlug, getVersionURL } from '../libs/versions'
+
+const { template } = Astro.props.entry['data']
+
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, Astro.props.entry.slug)
+---
+
+{
+  pageVersion && template === 'splash' && (
+    <div>
+      This content is for {pageVersion.label ?? `the ${pageVersion.slug} version`}. Switch to the
+      {/* prettier-ignore */}
+      <a href={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}>latest version</a>
+      for up-to-date documentation.
+    </div>
+  )
+}
+
+<style>
+  div {
+    background-color: var(--sl-color-orange-low);
+    box-shadow: var(--sl-shadow-sm);
+    color: var(--sl-color-orange-high);
+    line-height: var(--sl-line-height-headings);
+    padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  div a {
+    color: var(--sl-color-orange-high);
+  }
+</style>

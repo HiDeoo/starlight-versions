@@ -1,0 +1,52 @@
+{
+  "name": "starlight-versions-monorepo",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Starlight plugin to version documentation pages.",
+  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm --stream -r test",
+    "lint": "pnpm -r lint",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@hideoo/eslint-config": "^3.0.1",
+    "@hideoo/prettier-config": "^2.0.0",
+    "@hideoo/tsconfig": "^2.0.1",
+    "@types/node": "^18.19.33",
+    "astro": "^4.9.1",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.4",
+    "prettier": "^3.2.5",
+    "prettier-plugin-astro": "^0.13.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.0.4",
+  "private": true,
+  "sideEffects": false,
+  "keywords": [
+    "starlight",
+    "plugin",
+    "versions",
+    "versioning",
+    "documentation",
+    "astro"
+  ],
+  "homepage": "https://github.com/HiDeoo/starlight-versions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiDeoo/starlight-versions.git"
+  },
+  "bugs": "https://github.com/HiDeoo/starlight-versions/issues",
+  "lint-staged": {
+    "*": [
+      "prettier -w -u --cache",
+      "eslint --cache --no-warn-ignored --max-warnings=0"
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+---
+import { Icon } from '@astrojs/starlight/components'
+import type { Props } from '@astrojs/starlight/props'
+import starlightConfig from 'virtual:starlight/user-config'
+import starlightVersionsConfig from 'virtual:starlight-versions-config'
+
+import { getVersionFromSlug, getVersionURL } from '../libs/versions'
+
+const { slug } = Astro.props
+
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, slug)
+---
+
+<starlight-version-select>
+  <label>
+    <span class="sr-only">Select version</span>
+    <Icon name="seti:clock" class="icon label-icon" />
+    <select value={pageVersion?.label ?? 'current'}>
+      <option
+        selected={pageVersion === undefined}
+        value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}
+        >{starlightVersionsConfig.current.label}</option
+      >
+      {
+        starlightVersionsConfig.versions.map((version) => (
+          <option
+            selected={version.slug === pageVersion?.slug}
+            value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, version).pathname}
+          >
+            {version.label ?? version.slug}
+          </option>
+        ))
+      }
+    </select>
+    <Icon name="down-caret" class="icon caret-icon" />
+  </label>
+</starlight-version-select>
+
+<style>
+  label {
+    --sl-versions-label-icon-size: 0.875rem;
+    --sl-versions-caret-icon-size: 1.25rem;
+
+    align-items: center;
+    color: var(--sl-color-gray-1);
+    display: flex;
+    gap: 0.25rem;
+    position: relative;
+  }
+
+  label:hover {
+    color: var(--sl-color-gray-2);
+  }
+
+  .icon {
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .label-icon {
+    font-size: var(--sl-versions-label-icon-size);
+    inset-inline-start: 0;
+  }
+
+  .caret-icon {
+    font-size: var(--sl-versions-caret-icon-size);
+    inset-inline-end: 0;
+  }
+
+  select {
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    padding-block: 0.625rem;
+    padding-inline: calc(var(--sl-versions-label-icon-size) + 0.375rem)
+      calc(var(--sl-versions-caret-icon-size) + 0.25rem);
+    text-overflow: ellipsis;
+    width: 6.5em;
+  }
+
+  option {
+    background-color: var(--sl-color-bg-nav);
+    color: var(--sl-color-gray-1);
+  }
+
+  @media (min-width: 50rem) {
+    select {
+      font-size: var(--sl-text-sm);
+    }
+  }
+</style>
+
+<script>
+  customElements.define(
+    'starlight-version-select',
+    class StarlightVersionSelect extends HTMLElement {
+      constructor() {
+        super()
+
+        this.querySelector('select')?.addEventListener('change', (event) => {
+          if (event.currentTarget instanceof HTMLSelectElement) {
+            window.location.pathname = event.currentTarget.value
+          }
+        })
+      }
+    },
+  )
+</script>
