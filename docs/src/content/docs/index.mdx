@@ -1,6 +1,6 @@
 ---
 title: Starlight Versions
-description: // TODO(HiDeoo)
+description: Starlight plugin to version documentation pages.
 head:
   - tag: title
     content: Starlight Versions
@@ -8,16 +8,16 @@ template: splash
 editUrl: false
 lastUpdated: false
 hero:
-  tagline: // TODO(HiDeoo)
+  tagline: Starlight plugin to version documentation pages.
   image:
-    html: '📸 // TODO(HiDeoo)'
+    html: '🕒'
   actions:
     - text: Getting Started
       link: /getting-started/
       icon: rocket
       variant: primary
     - text: Demo
-      link: /demo/
+      link: https://starlight-versions-example.vercel.app
       icon: external
 ---
 
@@ -25,20 +25,18 @@ import { Card, CardGrid } from '@astrojs/starlight/components'
 
 ## Next steps
 
-{/* // TODO(HiDeoo) */}
-
 <CardGrid stagger>
-  <Card title="Install the library" icon="puzzle">
+  <Card title="Install the plugin" icon="puzzle">
     Check the [getting started guide](/getting-started/) for installation
     instructions.
   </Card>
-  <Card title="Pick components" icon="rocket">
-    Select the components you want to use in your showcase pages.
+  <Card title="Configure the plugin" icon="rocket">
+    Edit your config in the `astro.config.mjs` file.
   </Card>
-  <Card title="Create showcase pages" icon="seti:image">
-    Author showcase pages using the library components.
+  <Card title="Version your documentation" icon="seti:clock">
+    Author multiple versions of your documentation pages.
   </Card>
   <Card title="Read the docs" icon="open-book">
-    Learn more in the [Starlight Showcases Docs](/getting-started/).
+    Learn more in the [Starlight Versions Docs](/getting-started/).
   </Card>
 </CardGrid>

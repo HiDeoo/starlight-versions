@@ -53,9 +53,6 @@ importers:
       sharp:
         specifier: ^0.33.4
         version: 0.33.4
-      starlight-versions:
-        specifier: workspace:*
-        version: link:../packages/starlight-versions
 
   example:
     dependencies:

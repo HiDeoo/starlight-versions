@@ -14,8 +14,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.23.1",
     "astro": "^4.9.1",
-    "sharp": "^0.33.4",
-    "starlight-versions": "workspace:*"
+    "sharp": "^0.33.4"
   },
   "engines": {
     "node": ">=18"
