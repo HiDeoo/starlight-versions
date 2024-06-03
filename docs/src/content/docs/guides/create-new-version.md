@@ -1,6 +1,8 @@
 ---
 title: Create a New Version
 description: Learn how to create a new version of your documentation using the Starlight Versions plugin.
+sidebar:
+  order: 1
 ---
 
 The Starlight Versions plugin allows you to create multiple versions of your documentation pages.

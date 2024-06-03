@@ -1,0 +1,87 @@
+---
+title: About Versioning
+description: Learn more about versioning your documentation pages with the Starlight Versions plugin.
+---
+
+The Starlight Versions plugin adds support for versioning your documentation pages.
+
+Versioning a documentation site allows you to maintain multiple versions of your documentation, each with its own set of pages and assets.
+This is useful when you need to maintain different versions of your documentation but comes with various challenges like increasing complexity, slower build times, and more maintenance overhead.
+
+## Versioning process
+
+When using the Starlight Versions plugin, the current version of your documentation will always live in the [`src/content/docs/` directory](https://starlight.astro.build/getting-started/#add-content) just like any other Starlight documentation site.
+
+Creating a [new version](/guides/create-new-version/) will archive the current version of your documentation, pages, assets and sidebar configuration so that you can continue to work on the current version while the archived version remains accessible.
+
+The example below shows a typical directory structure for a Starlight documentation:
+
+import { FileTree } from '@astrojs/starlight/components'
+
+<FileTree>
+
+- src
+  - assets
+    - images
+      - preview.png
+  - content
+    - docs
+      - configuration.md
+      - getting-started.md
+      - index.mdx
+
+</FileTree>
+
+After creating a new version, e.g. `1.0`, the directory structure will look like this:
+
+<FileTree>
+
+- src
+  - assets
+    - images
+      - 1.0
+        - preview.png
+      - preview.png
+  - content
+    - docs
+      - 1.0
+        - configuration.md
+        - getting-started.md
+        - index.mdx
+      - configuration.md
+      - getting-started.md
+      - index.mdx
+
+</FileTree>
+
+All the version `1.0` pages and assets are archived in dedicated directories, allowing you to continue working on the current version of your documentation.
+
+## Versioning strategies
+
+Multiple approaches can be used to version your documentation, each with its own set of benefits and trade-offs.
+The Starlight Versions plugin uses a folder-based versioning strategy.
+
+### Folder-based versioning
+
+Using folder-based versioning, each version of a documentation is stored in dedicated directories, e.g. `1.0`, `2.0`, etc.
+
+This approach is usually considered the simplest approach for authors as cloning the documentation repository will include all versions of the documentation.
+No further knowledge of the versioning system is required to access the different versions.
+
+However, this approach can lead to a large number of directories and files, which can make it more difficult to maintain and navigate the documentation.
+Another downside is that each version page is created as a new copy of an existing page, losing the ability to easily track changes between versions.
+
+### Branch-based versioning
+
+Using branch-based versioning, each version of a documentation is stored in dedicated branches of a git repository.
+
+Branches are used to separate the different versions of the documentation, allowing authors to work on different versions in parallel without multiple copies of all the documentation files available at the same time.
+
+authors can easily switch between versions by checking out the appropriate branch but need to be familiar with git and its branching system to manage the different versions.
+
+### Tag-based versioning
+
+Using tag-based versioning, each version of a documentation is stored in dedicated tags of a git repository.
+
+This approach is similar to branch-based versioning but uses tags instead of branches to separate the different versions of the documentation.
+It comes with the same benefits of branch-based versioning but prevents updating a version after it has been tagged.
