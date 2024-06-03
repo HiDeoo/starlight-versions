@@ -7,8 +7,6 @@ import { vitePluginStarlightVersions } from './libs/vite'
 
 export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './libs/config'
 
-// TODO(HiDeoo) splash page notice
-
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
   const parsedConfig = StarlightVersionsConfigSchema.safeParse(userConfig)
 
@@ -46,6 +44,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
                 { name: 'Pagination', fallback: 'VersionPagination' },
                 { name: 'Search', fallback: 'VersionSearch' },
                 { name: 'PageTitle', fallback: 'VersionNotice' },
+                { name: 'Banner', fallback: 'VersionBanner' },
               ],
               logger,
             ),
