@@ -13,12 +13,13 @@
   <br />
 </div>
 
-## Getting Started
+## Example
 
-Want to get started immediately? Check out the [getting started guide](https://starlight-versions.vercel.app/getting-started/).
+Run the example locally using [pnpm](https://pnpm.io):
 
-> [!IMPORTANT]
-> Starlight Versions is an [opinionated](https://starlight-versions.vercel.app/guides/about-versioning/#versioning-strategies) plugin that is still in early development. Expect frequent updates and changes to the plugin as development continues.
+```shell
+pnpm run dev
+```
 
 ## License
 
