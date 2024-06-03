@@ -8,6 +8,7 @@ import { vitePluginStarlightVersions } from './libs/vite'
 export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './libs/config'
 
 // TODO(HiDeoo) docs: aside early prototype
+// TODO(HiDeoo) splash page notice
 
 export default function starlightVersionsPlugin(userConfig: StarlightVersionsUserConfig): StarlightPlugin {
   const parsedConfig = StarlightVersionsConfigSchema.safeParse(userConfig)

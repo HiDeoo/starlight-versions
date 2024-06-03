@@ -89,10 +89,7 @@ If not provided, the version slug is used.
 **Type:** `'same-page' | 'root'`  
 **Default:** `'same-page'`
 
-The version redirect strategy used when navigating to this version:
-
-- `same-page`: Redirect to the same page when navigating to this version.
-- `root`: Redirect to the root page of the documentation when to this version.
+The version [redirect strategy](#redirect-strategies) used when navigating to this version.
 
 ## Current version configuration
 
@@ -128,7 +125,11 @@ An optional label used in the UI for the current version.
 **Type:** `'same-page' | 'root'`  
 **Default:** `'same-page'`
 
-The version redirect strategy used when navigating to this version:
+The version [redirect strategy](#redirect-strategies) used when navigating to the current version.
+
+## Redirect strategies
+
+When navigating to a different version, the plugin supports two redirect strategies:
 
 - `same-page`: Redirect to the same page when navigating to this version.
 - `root`: Redirect to the root page of the documentation when to this version.
