@@ -105,10 +105,9 @@ export async function getVersionedSidebar(
   currentSidebar: StarlightSidebarUserConfig,
   srcDir: URL,
 ): Promise<NonNullable<StarlightSidebarUserConfig>> {
-  const sidebar = [
+  const sidebar: StarlightSidebarUserConfig = [
     {
       label: currentVersionSidebarGroupLabel.toString(),
-      // TODO(HiDeoo) undefined (we may need to autogen everything and filter in the override component)
       items: currentSidebar ?? [],
     },
   ]
@@ -274,10 +273,16 @@ export function getVersionFromPaginationLink(
 async function getSidebarVersionGroup(version: Version, srcDir: URL) {
   const versionConfig = await getVersionConfig(version, srcDir)
 
+  if (!versionConfig.sidebar) {
+    return {
+      label: version.slug,
+      autogenerate: { directory: version.slug },
+    }
+  }
+
   return {
     label: version.slug,
-    // TODO(HiDeoo) handle undefined
-    items: versionConfig.sidebar ? addPrefixToSidebarConfig(version.slug, versionConfig.sidebar) : [],
+    items: addPrefixToSidebarConfig(version.slug, versionConfig.sidebar),
   }
 }
 
