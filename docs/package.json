@@ -2,7 +2,7 @@
   "name": "starlight-versions-docs",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "// TODO(HiDeoo)",
+  "description": "Starlight plugin to version documentation pages.",
   "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
   "type": "module",
   "scripts": {
@@ -24,7 +24,12 @@
   "private": true,
   "sideEffects": false,
   "keywords": [
-    "// TODO(HiDeoo)"
+    "starlight",
+    "plugin",
+    "versions",
+    "versioning",
+    "documentation",
+    "astro"
   ],
   "homepage": "https://github.com/HiDeoo/starlight-versions",
   "repository": {
