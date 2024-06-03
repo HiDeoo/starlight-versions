@@ -303,10 +303,7 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   for (const version of config.versions) {
     if (!docsDirDirectories.has(version.slug)) {
       if (newVersion) {
-        throw new Error(
-          // TODO(HiDeoo)
-          'Only one version can be created at a time.\nPlease make sure to create the version before creating another one.',
-        )
+        throw new Error('Only one new version can be configured at a time.')
       }
       newVersion = version
     }
