@@ -1,0 +1,37 @@
+---
+title: Starlight Versions Example
+description: Starlight plugin to version documentation pages.
+head:
+  - tag: title
+    content: Starlight Versions Example
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  tagline: Starlight plugin to version documentation pages.
+  image:
+    html: '🕒'
+  actions:
+    - text: Check Example
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Documentation
+      link: https://starlight-versions.vercel.app
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+## Next steps
+
+<CardGrid stagger>
+  <Card title="Explore the example" icon="magnifier">
+    Browse through the example pages to see how the plugin works.
+  </Card>
+  <Card title="Install the plugin" icon="puzzle">
+    Check the [getting
+    started](https://starlight-versions.vercel.app/getting-started/) guide for
+    installation instructions.
+  </Card>
+</CardGrid>

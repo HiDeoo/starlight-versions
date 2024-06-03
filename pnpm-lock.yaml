@@ -57,6 +57,21 @@ importers:
         specifier: workspace:*
         version: link:../packages/starlight-versions
 
+  example:
+    dependencies:
+      '@astrojs/starlight':
+        specifier: ^0.23.1
+        version: 0.23.2(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5))
+      astro:
+        specifier: ^4.9.1
+        version: 4.9.2(@types/node@18.19.33)(typescript@5.4.5)
+      sharp:
+        specifier: ^0.33.4
+        version: 0.33.4
+      starlight-versions:
+        specifier: workspace:*
+        version: link:../packages/starlight-versions
+
   packages/starlight-versions:
     dependencies:
       '@astrojs/starlight':

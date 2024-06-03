@@ -1,0 +1,34 @@
+{
+  "name": "starlight-versions-example",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "// TODO(HiDeoo)",
+  "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.23.1",
+    "astro": "^4.9.1",
+    "sharp": "^0.33.4",
+    "starlight-versions": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.0.4",
+  "private": true,
+  "sideEffects": false,
+  "keywords": [
+    "// TODO(HiDeoo)"
+  ],
+  "homepage": "https://github.com/HiDeoo/starlight-versions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiDeoo/starlight-versions.git"
+  },
+  "bugs": "https://github.com/HiDeoo/starlight-versions/issues"
+}
