@@ -22,10 +22,10 @@ const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionS
 
 export const VersionBaseSchema = z.object({
   /**
-   * The version redirect strategy used when navigating between versions.
+   * The version redirect strategy used when navigating to this version:
    *
-   * - `same-page`: Redirect to the same page when navigating between versions.
-   * - `root`: Redirect to the root page of the documentation when navigating between versions.
+   * - `same-page`: Redirect to the same page when navigating to this version.
+   * - `root`: Redirect to the root page of the documentation when to this version.
    *
    * @default 'same-page'
    */
