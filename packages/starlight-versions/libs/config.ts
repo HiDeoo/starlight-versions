@@ -4,18 +4,25 @@ import { VersionBaseSchema, VersionSchema } from './versions'
 
 export const StarlightVersionsConfigSchema = z
   .object({
-    // TODO(HiDeoo) comment
+    /**
+     * Options related to the current version of the documentation.
+     */
     current: z
       .object({
-        // TODO(HiDeoo) comment
+        /**
+         * The label used in the UI to represent the current version.
+         *
+         * @default 'Latest'
+         */
         label: z.string().default('Latest'),
       })
       .merge(VersionBaseSchema)
       .default({}),
-    // TODO(HiDeoo) comment
+    /**
+     * A list of all available versions of the documentation.
+     */
     versions: z.array(VersionSchema).refine((value) => value.length > 0, {
-      // TODO(HiDeoo)
-      message: 'At least one version must be defined.',
+      message: 'At least one version of the documentation must be defined.',
     }),
   })
   .transform((value) => ({

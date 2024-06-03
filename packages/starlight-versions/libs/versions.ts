@@ -21,15 +21,33 @@ import {
 const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionSidebarGroupLabel')
 
 export const VersionBaseSchema = z.object({
-  // TODO(HiDeoo) comment
+  /**
+   * The version redirect strategy used when navigating between versions.
+   *
+   * - `same-page`: Redirect to the same page when navigating between versions.
+   * - `root`: Redirect to the root page of the documentation when navigating between versions.
+   *
+   * @default 'same-page'
+   */
   redirect: z.union([z.literal('root'), z.literal('same-page')]).default('same-page'),
 })
 
 export const VersionSchema = z
   .object({
-    // TODO(HiDeoo) comment
+    /**
+     * An optional label used in the UI when displaying the version.
+     * If not provided, the version slug is used.
+     *
+     * @example 'v2.0'
+     * @example 'v3.1.2'
+     */
     label: z.string().optional(),
-    // TODO(HiDeoo) comment
+    /**
+     * The version slug used in URLs to identify the version and its content.
+     *
+     * @example '2.0'
+     * @example '3-1-2'
+     */
     slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
   })
   .merge(VersionBaseSchema)
