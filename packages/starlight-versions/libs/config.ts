@@ -19,7 +19,7 @@ export const StarlightVersionsConfigSchema = z
       .merge(VersionBaseSchema)
       .default({}),
     /**
-     * A list of all available versions of the documentation.
+     * A list of all archived versions of the documentation.
      */
     versions: z.array(VersionSchema).refine((value) => value.length > 0, {
       message: 'At least one version of the documentation must be defined.',

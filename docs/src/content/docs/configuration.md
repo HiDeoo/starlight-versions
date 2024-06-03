@@ -34,10 +34,10 @@ The Starlight Versions plugin accepts the following configuration options:
 **Required**  
 **Type:** <code><a href="#version-configuration">StarlightVersionConfig</a>[]</code>
 
-A list of all available versions of the documentation.
+A list of all archived versions of the documentation.
 See the [version configuration](#version-configuration) section or the [“Create a New Version”](/guides/create-new-version/) guide for more details.
 
-### `versions`
+### `current`
 
 **Type:** [`StarlightCurrentVersionConfig`](#current-version-configuration)
 
@@ -74,14 +74,14 @@ The following properties are supported by a version configuration object:
 **Required**  
 **Type:** `string`
 
-The version slug used in URLs to identify the version and its content.
+The version slug used in URLs to identify the version and its content, e.g. `1.0` or `2-1-0`.
 
 ### `label`
 
 **Type:** `string`  
-**Default:** the version [slug](#slug)
+**Default:** the version [`slug`](#slug)
 
-An optional label used in the UI when displaying the version.
+An optional label used in the UI when displaying the version, e.g. `v1.0`.
 If not provided, the version slug is used.
 
 ### `redirect`

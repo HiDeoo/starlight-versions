@@ -4,10 +4,12 @@ description: Learn how to version your documentation pages with the Starlight Ve
 ---
 
 A [Starlight](https://starlight.astro.build) plugin to version documentation pages.
-
-// TODO(HiDeoo) notice
-
 Check out the [demo](https://starlight-versions-example.vercel.app) for a preview of the plugin in action.
+
+:::tip[Caution]
+Starlight Versions is an [opinionated](/guides/about-versioning/#versioning-strategies) plugin that is still in early development.
+Expect frequent updates and changes to the plugin as development continues.
+:::
 
 ## Prerequisites
 
@@ -51,7 +53,7 @@ import { PackageManagers } from 'starlight-package-managers'
    })
    ```
 
-3. Starlight Versions uses Astro’s [content collections](https://docs.astro.build/en/guides/content-collections/), which are configured in the `src/content/config.ts file`.
+3. Starlight Versions uses Astro’s [content collections](https://docs.astro.build/en/guides/content-collections/), which are configured in the `src/content/config.ts` file.
 
    Update the content config file, adding a `versions` collection that uses Starlight Versions `docsVersionsSchema`:
 
