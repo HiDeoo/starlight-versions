@@ -53,6 +53,9 @@ importers:
       sharp:
         specifier: ^0.33.4
         version: 0.33.4
+      starlight-package-managers:
+        specifier: ^0.6.0
+        version: 0.6.0(@astrojs/starlight@0.23.2(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5)))(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5))
 
   example:
     dependencies:
@@ -3096,6 +3099,13 @@ packages:
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
+
+  starlight-package-managers@0.6.0:
+    resolution: {integrity: sha512-2tE0B4ZVEZXZ1LJjcSvVXLfJP8SB2nE+nhiFgSa3fuHUPtnbzmFxLVp7jEKD8jaMXKWPYtlNTy95gJSK9W1sbQ==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.22.0'
+      astro: '>=4.2.7'
 
   std-env@3.7.0:
     resolution: {integrity: sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==}
@@ -7343,6 +7353,11 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   stackback@0.0.2: {}
+
+  starlight-package-managers@0.6.0(@astrojs/starlight@0.23.2(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5)))(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5)):
+    dependencies:
+      '@astrojs/starlight': 0.23.2(astro@4.9.2(@types/node@18.19.33)(typescript@5.4.5))
+      astro: 4.9.2(@types/node@18.19.33)(typescript@5.4.5)
 
   std-env@3.7.0: {}
 

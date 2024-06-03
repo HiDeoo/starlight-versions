@@ -11,12 +11,16 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Start Here',
-          items: [{ label: 'Getting Started', link: '/getting-started/' }],
+          items: [
+            { label: 'Getting Started', link: '/getting-started/' },
+            { label: 'Configuration', link: '/configuration/' },
+          ],
         },
         {
           label: 'Guides',
           autogenerate: { directory: 'guides' },
         },
+        { label: 'Demo', link: 'https://starlight-versions-example.vercel.app' },
       ],
       social: {
         github: 'https://github.com/HiDeoo/starlight-versions',
