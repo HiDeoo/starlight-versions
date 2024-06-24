@@ -20,6 +20,10 @@ export default defineConfig({
           label: 'Guides',
           autogenerate: { directory: 'guides' },
         },
+        {
+          label: 'Resources',
+          items: [{ label: 'Plugins and Tools', link: '/resources/starlight/' }],
+        },
         { label: 'Demo', link: 'https://starlight-versions-example.vercel.app' },
       ],
       social: {
