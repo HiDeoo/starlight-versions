@@ -3,10 +3,7 @@
     {
       "label": "Start Here",
       "items": [
-        {
-          "label": "Getting Started",
-          "link": "/getting-started/"
-        },
+        { "slug": "getting-started" },
         {
           "label": "Another Page",
           "link": "/another-page/"

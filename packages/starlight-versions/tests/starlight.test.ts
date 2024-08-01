@@ -109,4 +109,41 @@ describe('addPrefixToSidebarConfig', () => {
       ]
     `)
   })
+
+  test('prefasdasdaix links in groups', () => {
+    expect(
+      addPrefixToSidebarConfig('3.0', [
+        { slug: 'test-root-1' },
+        'test-root-2',
+        {
+          label: 'Group',
+          items: [
+            { label: 'Test 1', slug: 'group/test-nested-1' },
+            { slug: 'group/test-nested-2' },
+            'group/test-nested-3',
+          ],
+        },
+      ]),
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "slug": "3.0/test-root-1",
+        },
+        "3.0/test-root-2",
+        {
+          "items": [
+            {
+              "label": "Test 1",
+              "slug": "3.0/group/test-nested-1",
+            },
+            {
+              "slug": "3.0/group/test-nested-2",
+            },
+            "3.0/group/test-nested-3",
+          ],
+          "label": "Group",
+        },
+      ]
+    `)
+  })
 })
