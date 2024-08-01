@@ -41,7 +41,9 @@ export function addPrefixToSidebarConfig(
   sidebar: NonNullable<StarlightSidebarUserConfig>,
 ): NonNullable<StarlightSidebarUserConfig> {
   return sidebar.map((item) => {
-    if ('items' in item) {
+    if (typeof item === 'string') {
+      return addPrefixToSlug(prefix, item)
+    } else if ('items' in item) {
       return {
         ...item,
         items: addPrefixToSidebarConfig(prefix, item.items),
@@ -53,6 +55,11 @@ export function addPrefixToSidebarConfig(
           ...item.autogenerate,
           directory: path.posix.join(prefix, item.autogenerate.directory),
         },
+      }
+    } else if ('slug' in item) {
+      return {
+        ...item,
+        slug: addPrefixToSlug(prefix, item.slug),
       }
     } else if (isAbsoluteLink(item.link)) {
       return item
@@ -66,6 +73,10 @@ export function addPrefixToSidebarConfig(
       link: segments.join('/'),
     }
   })
+}
+
+function addPrefixToSlug(prefix: string, slug: string) {
+  return `${prefix}/${slug}`
 }
 
 type StarlightFrontmatter = z.input<ReturnType<ReturnType<typeof docsSchema>>> & {

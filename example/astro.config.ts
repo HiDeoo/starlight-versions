@@ -26,10 +26,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Start Here',
-          items: [
-            { label: 'Getting Started', link: '/getting-started/' },
-            { label: 'Another Page', link: '/another-page/' },
-          ],
+          items: [{ slug: 'getting-started' }, { label: 'Another Page', link: '/another-page/' }],
         },
         {
           label: 'Guides',
