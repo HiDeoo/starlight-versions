@@ -13,12 +13,12 @@ import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromSlug, getVersionIdentifier, getVersionURL } from '../libs/versions'
 
-const { entry, labels } = Astro.props
+const { entry } = Astro.props
 
 const pagefindTranslations = {
-  placeholder: labels['search.label'],
+  placeholder: Astro.locals.t('search.label'),
   ...Object.fromEntries(
-    Object.entries(labels)
+    Object.entries(Astro.locals.t.all())
       .filter(([key]) => key.startsWith('pagefind.'))
       .map(([key, value]) => [key.replace('pagefind.', ''), value]),
   ),
@@ -35,20 +35,20 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
   data-pagefind-filter={`version:${pageVersionIdentifier}`}
 >
   <button data-open-modal disabled>
-    <Icon name="magnifier" label={labels['search.label']} />
-    <span class="sl-hidden md:sl-block" aria-hidden="true">{labels['search.label']}</span>
-    <Icon name="forward-slash" class="sl-hidden md:sl-block" label={labels['search.shortcutLabel']} />
+    <Icon name="magnifier" label={Astro.locals.t('search.label')} />
+    <span class="sl-hidden md:sl-block" aria-hidden="true">{Astro.locals.t('search.label')}</span>
+    <Icon name="forward-slash" class="sl-hidden md:sl-block" label={Astro.locals.t('search.shortcutLabel')} />
   </button>
 
-  <dialog style="padding:0" aria-label={labels['search.label']}>
+  <dialog style="padding:0" aria-label={Astro.locals.t('search.label')}>
     <div class="dialog-frame sl-flex">
       <button data-close-modal class="sl-flex md:sl-hidden">
-        {labels['search.cancelLabel']}
+        {Astro.locals.t('search.cancelLabel')}
       </button>
       {
         import.meta.env.DEV ? (
           <div style="margin: auto; text-align: center; white-space: pre-line;" dir="ltr">
-            <p>{labels['search.devWarning']}</p>
+            <p>{Astro.locals.t('search.devWarning')}</p>
           </div>
         ) : (
           <div class="search-container">
