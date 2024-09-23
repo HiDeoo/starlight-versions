@@ -11,8 +11,8 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.25.3",
-    "astro": "^4.9.1",
+    "@astrojs/starlight": "^0.28.2",
+    "astro": "^4.15.8",
     "sharp": "^0.33.4",
     "starlight-versions": "workspace:*"
   },
