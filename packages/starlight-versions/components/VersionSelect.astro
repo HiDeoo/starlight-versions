@@ -15,7 +15,7 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
   <label>
     <span class="sr-only">Select version</span>
     <Icon name="seti:clock" class="icon label-icon" />
-    <select value={pageVersion?.label ?? 'current'}>
+    <select value={pageVersion?.label ?? 'current'} autocomplete="off">
       <option
         selected={pageVersion === undefined}
         value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}
@@ -101,9 +101,23 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
       constructor() {
         super()
 
-        this.querySelector('select')?.addEventListener('change', (event) => {
+        const select = this.querySelector('select')
+        if (!select) return
+
+        select?.addEventListener('change', (event) => {
           if (event.currentTarget instanceof HTMLSelectElement) {
             window.location.pathname = event.currentTarget.value
+          }
+        })
+
+        window.addEventListener('pageshow', (event) => {
+          if (!event.persisted) return
+          const markupSelectedIndex = select.querySelector<HTMLOptionElement>('option[selected]')?.index
+
+          // If the page was loaded from a cache, the version select selected index might not be in sync with the
+          // current page.
+          if (markupSelectedIndex !== select.selectedIndex) {
+            select.selectedIndex = markupSelectedIndex ?? 0
           }
         })
       }
