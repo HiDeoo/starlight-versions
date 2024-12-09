@@ -34,6 +34,7 @@ export default defineConfig({
         },
       ],
       social: {
+        blueSky: 'https://bsky.app/profile/hideoo.dev',
         github: 'https://github.com/HiDeoo/starlight-versions',
       },
       title: 'Starlight Versions Example',

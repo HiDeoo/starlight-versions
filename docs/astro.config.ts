@@ -27,6 +27,7 @@ export default defineConfig({
         { label: 'Demo', link: 'https://starlight-versions-example.vercel.app' },
       ],
       social: {
+        blueSky: 'https://bsky.app/profile/hideoo.dev',
         github: 'https://github.com/HiDeoo/starlight-versions',
       },
       title: 'Starlight Versions',
