@@ -8,12 +8,13 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "lint": "eslint . --cache --max-warnings=0"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.28.2",
-    "astro": "^4.15.9",
-    "sharp": "^0.33.4",
+    "@astrojs/starlight": "^0.30.2",
+    "astro": "^5.0.9",
+    "sharp": "^0.33.5",
     "starlight-versions": "workspace:*"
   },
   "engines": {
@@ -33,7 +34,8 @@
   "homepage": "https://github.com/HiDeoo/starlight-versions",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HiDeoo/starlight-versions.git"
+    "url": "https://github.com/HiDeoo/starlight-versions.git",
+    "directory": "example"
   },
   "bugs": "https://github.com/HiDeoo/starlight-versions/issues"
 }
