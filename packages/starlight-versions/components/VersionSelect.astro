@@ -6,9 +6,9 @@ import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
-const { slug } = Astro.props
+const { id } = Astro.props
 
-const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, slug)
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, id)
 ---
 
 <starlight-version-select>
@@ -106,7 +106,7 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
 
         select?.addEventListener('change', (event) => {
           if (event.currentTarget instanceof HTMLSelectElement) {
-            window.location.pathname = event.currentTarget.value
+            globalThis.location.pathname = event.currentTarget.value
           }
         })
 

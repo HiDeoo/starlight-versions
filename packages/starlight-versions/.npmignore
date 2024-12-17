@@ -1,4 +1,3 @@
-.prettierignore
 fixtures
 tests
 tsconfig.json

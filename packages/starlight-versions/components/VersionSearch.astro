@@ -26,18 +26,22 @@ const pagefindTranslations = {
 
 const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
 const pageVersionIdentifier = getVersionIdentifier(pageVersion)
+
+const dataAttributes: DOMStringMap = {
+  'data-pagefind-filter': `version:${pageVersionIdentifier}`,
+  'data-translations': JSON.stringify(pagefindTranslations),
+  'data-version': pageVersionIdentifier,
+}
+if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash'] = ''
 ---
 
-<site-search
-  data-translations={JSON.stringify(pagefindTranslations)}
-  data-strip-trailing-slash={project.trailingSlash === 'never'}
-  data-version={pageVersionIdentifier}
-  data-pagefind-filter={`version:${pageVersionIdentifier}`}
->
+<site-search class={Astro.props['class']} {...dataAttributes}>
   <button data-open-modal disabled>
-    <Icon name="magnifier" label={Astro.locals.t('search.label')} />
+    <Icon name="magnifier" />
     <span class="sl-hidden md:sl-block" aria-hidden="true">{Astro.locals.t('search.label')}</span>
-    <Icon name="forward-slash" class="sl-hidden md:sl-block" label={Astro.locals.t('search.shortcutLabel')} />
+    <kbd class="sl-hidden md:sl-flex" style="display: none;">
+      <kbd>{Astro.locals.t('search.ctrlKey')}</kbd><kbd>K</kbd>
+    </kbd>
   </button>
 
   <dialog style="padding:0" aria-label={Astro.locals.t('search.label')}>
@@ -72,6 +76,27 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
   </dialog>
 </site-search>
 
+{
+  /**
+   * This is intentionally inlined to avoid briefly showing an invalid shortcut.
+   * Purposely using the deprecated `navigator.platform` property to detect Apple devices, as the
+   * user agent is spoofed by some browsers when opening the devtools.
+   */
+}
+<script is:inline>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script>
+
 <script>
   class SiteSearch extends HTMLElement {
     constructor() {
@@ -95,7 +120,7 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
         document.body.toggleAttribute('data-search-modal-open', true)
         this.querySelector('input')?.focus()
         event?.stopPropagation()
-        window.addEventListener('click', onClick)
+        globalThis.addEventListener('click', onClick)
       }
 
       const closeModal = () => dialog.close()
@@ -106,20 +131,17 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
 
       dialog.addEventListener('close', () => {
         document.body.toggleAttribute('data-search-modal-open', false)
-        window.removeEventListener('click', onClick)
+        globalThis.removeEventListener('click', onClick)
       })
 
-      // Listen for `/`, `ctrl + k`, and `cmd + k` keyboard shortcuts.
-      window.addEventListener('keydown', (e) => {
-        const isInput =
-          document.activeElement instanceof HTMLElement &&
-          (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase()) ||
-            document.activeElement.isContentEditable)
+      // Listen for `ctrl + k` and `cmd + k` keyboard shortcuts.
+      globalThis.addEventListener('keydown', (e) => {
         if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'k') {
-          dialog.open ? closeModal() : openModal()
-          e.preventDefault()
-        } else if (e.key === '/' && !dialog.open && !isInput) {
-          openModal()
+          if (dialog.open) {
+            closeModal()
+          } else {
+            openModal()
+          }
           e.preventDefault()
         }
       })
@@ -135,9 +157,9 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
       const formatURL = shouldStrip ? this.stripTrailingSlash : (path: string) => path
       const version = this.dataset['version'] ?? 'current'
 
-      window.addEventListener('DOMContentLoaded', () => {
+      globalThis.addEventListener('DOMContentLoaded', () => {
         if (import.meta.env.DEV) return
-        const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1))
+        const onIdle = globalThis.requestIdleCallback || ((cb) => setTimeout(cb, 1))
         onIdle(async () => {
           // @ts-expect-error — Missing types for @pagefind/default-ui package.
           const { PagefindUI } = await import('@pagefind/default-ui')
@@ -189,7 +211,7 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
       border: 1px solid var(--sl-color-gray-5);
       border-radius: 0.5rem;
       padding-inline-start: 0.75rem;
-      padding-inline-end: 1rem;
+      padding-inline-end: 0.5rem;
       background-color: var(--sl-color-black);
       color: var(--sl-color-gray-2);
       font-size: var(--sl-text-sm);
@@ -206,6 +228,18 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
     }
   }
 
+  button > kbd {
+    border-radius: 0.25rem;
+    font-size: var(--sl-text-2xs);
+    gap: 0.25em;
+    padding-inline: 0.375rem;
+    background-color: var(--sl-color-gray-6);
+  }
+
+  kbd {
+    font-family: var(--__sl-font);
+  }
+
   dialog {
     margin: 0;
     background-color: var(--sl-color-gray-6);
@@ -217,7 +251,7 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
     box-shadow: var(--sl-shadow-lg);
   }
   dialog[open] {
-    display: grid;
+    display: flex;
   }
 
   dialog::backdrop {
@@ -227,7 +261,10 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
   }
 
   .dialog-frame {
+    position: relative;
+    overflow: auto;
     flex-direction: column;
+    flex-grow: 1;
     gap: 1rem;
     padding: 1rem;
   }
@@ -381,6 +418,10 @@ const pageVersionIdentifier = getVersionIdentifier(pageVersion)
   }
   #starlight__search .pagefind-ui__result-inner > :last-child {
     border-radius: 0 0 var(--sl-search-corners) var(--sl-search-corners);
+  }
+
+  #starlight__search .pagefind-ui__result-inner > .pagefind-ui__result-excerpt {
+    display: none;
   }
 
   #starlight__search .pagefind-ui__result-inner > .pagefind-ui__result-title {

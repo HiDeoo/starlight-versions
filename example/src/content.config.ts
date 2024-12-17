@@ -1,9 +1,11 @@
+import { docsLoader } from '@astrojs/starlight/loaders'
 import { docsSchema } from '@astrojs/starlight/schema'
 import { defineCollection, z } from 'astro:content'
-import { docsVersionsSchema } from 'starlight-versions/schema'
+import { docsVersionsLoader } from 'starlight-versions/loader'
 
 export const collections = {
   docs: defineCollection({
+    loader: docsLoader(),
     schema: docsSchema({
       extend: z.object({
         banner: z
@@ -17,5 +19,5 @@ export const collections = {
       }),
     }),
   }),
-  versions: defineCollection({ type: 'data', schema: docsVersionsSchema() }),
+  versions: defineCollection({ loader: docsVersionsLoader() }),
 }

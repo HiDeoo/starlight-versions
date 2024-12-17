@@ -1,4 +1,4 @@
-import util from 'node:util'
+import { inspect } from 'node:util'
 
 import type { StarlightConfig, StarlightUserConfig } from '@astrojs/starlight/types'
 import { describe, expect, test, vi } from 'vitest'
@@ -749,7 +749,7 @@ function createTestStarlightConfig(userConfig: Partial<StarlightUserConfig>): St
   return {
     ...userConfig,
     isMultilingual: userConfig.locales !== undefined && Object.keys(userConfig.locales).length > 1,
-    [util.inspect.custom]: () => userConfig.title,
+    [inspect.custom]: () => userConfig.title,
   } as unknown as StarlightConfig
 }
 
