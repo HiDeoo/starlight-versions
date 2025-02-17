@@ -1,9 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/Banner.astro'
-import type { Props } from '@astrojs/starlight/props'
 
 import VersionBanner from '../components/VersionBanner.astro'
 ---
 
-<VersionBanner {...Astro.props} />
-<Default {...Astro.props}><slot /></Default>
+<VersionBanner />
+<Default><slot /></Default>

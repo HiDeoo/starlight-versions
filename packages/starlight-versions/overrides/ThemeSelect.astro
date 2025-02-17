@@ -1,9 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/ThemeSelect.astro'
-import type { Props } from '@astrojs/starlight/props'
 
 import VersionSelect from '../components/VersionSelect.astro'
 ---
 
-<VersionSelect {...Astro.props} />
-<Default {...Astro.props}><slot /></Default>
+<VersionSelect />
+<Default><slot /></Default>

@@ -5,7 +5,6 @@
  */
 
 import { Icon } from '@astrojs/starlight/components'
-import type { Props } from '@astrojs/starlight/props'
 import '@pagefind/default-ui/css/ui.css'
 import project from 'virtual:starlight/project-context'
 import starlightConfig from 'virtual:starlight/user-config'
@@ -13,7 +12,7 @@ import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromSlug, getVersionIdentifier, getVersionURL } from '../libs/versions'
 
-const { entry } = Astro.props
+const { entry } = Astro.locals.starlightRoute
 
 const pagefindTranslations = {
   placeholder: Astro.locals.t('search.label'),

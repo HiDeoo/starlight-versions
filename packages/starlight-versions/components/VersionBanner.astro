@@ -1,13 +1,13 @@
 ---
-import type { Props } from '@astrojs/starlight/props'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
-const { template } = Astro.props.entry['data']
+const { entry } = Astro.locals.starlightRoute
+const { template } = Astro.locals.starlightRoute.entry.data
 
-const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, Astro.props.entry.slug)
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
 ---
 
 {

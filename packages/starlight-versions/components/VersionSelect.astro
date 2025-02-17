@@ -1,12 +1,11 @@
 ---
 import { Icon } from '@astrojs/starlight/components'
-import type { Props } from '@astrojs/starlight/props'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
 import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 
-const { id } = Astro.props
+const { id } = Astro.locals.starlightRoute
 
 const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, id)
 ---
