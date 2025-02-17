@@ -21,7 +21,15 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
-      async setup({ addIntegration, astroConfig, command, config: starlightConfig, logger, updateConfig }) {
+      async 'config:setup'({
+        addIntegration,
+        addRouteMiddleware,
+        astroConfig,
+        command,
+        config: starlightConfig,
+        logger,
+        updateConfig,
+      }) {
         if (command !== 'dev' && command !== 'build') return
 
         try {
@@ -33,6 +41,8 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
         }
 
         try {
+          addRouteMiddleware({ entrypoint: 'starlight-versions/middleware' })
+
           const versionedSidebar = await getVersionedSidebar(config, starlightConfig.sidebar, astroConfig.srcDir)
 
           updateConfig({
@@ -40,8 +50,6 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
               starlightConfig,
               [
                 { name: 'ThemeSelect', fallback: 'VersionSelect' },
-                { name: 'Sidebar', fallback: 'VersionSidebar' },
-                { name: 'Pagination', fallback: 'VersionPagination' },
                 { name: 'Search', fallback: 'VersionSearch' },
                 { name: 'PageTitle', fallback: 'VersionNotice' },
                 { name: 'Banner', fallback: 'VersionBanner' },

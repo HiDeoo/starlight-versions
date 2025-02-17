@@ -1,3 +1,4 @@
+eslint.config.mjs
 fixtures
 tests
 tsconfig.json

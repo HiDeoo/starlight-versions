@@ -10,15 +10,12 @@
     "./loader": "./loader.ts",
     "./components/VersionBanner.astro": "./components/VersionBanner.astro",
     "./components/VersionNotice.astro": "./components/VersionNotice.astro",
-    "./components/VersionPagination.astro": "./components/VersionPagination.astro",
     "./components/VersionSearch.astro": "./components/VersionSearch.astro",
     "./components/VersionSelect.astro": "./components/VersionSelect.astro",
-    "./components/VersionSidebar.astro": "./components/VersionSidebar.astro",
+    "./middleware": "./middleware.ts",
     "./overrides/Banner.astro": "./overrides/Banner.astro",
     "./overrides/PageTitle.astro": "./overrides/PageTitle.astro",
-    "./overrides/Pagination.astro": "./overrides/Pagination.astro",
     "./overrides/Search.astro": "./overrides/Search.astro",
-    "./overrides/Sidebar.astro": "./overrides/Sidebar.astro",
     "./overrides/ThemeSelect.astro": "./overrides/ThemeSelect.astro",
     "./package.json": "./package.json"
   },
@@ -44,7 +41,7 @@
     "vitest": "2.1.6"
   },
   "peerDependencies": {
-    "@astrojs/starlight": ">=0.30.0"
+    "@astrojs/starlight": ">=0.32.0"
   },
   "engines": {
     "node": ">=18"

@@ -1,9 +1,9 @@
 import path from 'node:path'
 import url from 'node:url'
 
-import type { Props } from '@astrojs/starlight/props'
+import type { StarlightRouteData } from '@astrojs/starlight/route-data'
 import type { docsSchema } from '@astrojs/starlight/schema'
-import type { StarlightPlugin } from '@astrojs/starlight/types'
+import type { HookParameters } from '@astrojs/starlight/types'
 import type { z } from 'astro/zod'
 import yaml from 'yaml'
 
@@ -93,7 +93,7 @@ interface StarlightFrontmatteHero {
   }
 }
 
-export type StarlightUserConfig = Parameters<StarlightPlugin['hooks']['setup']>['0']['config']
+export type StarlightUserConfig = HookParameters<'config:setup'>['config']
 export type StarlightSidebarUserConfig = StarlightUserConfig['sidebar']
 
-export type StarlightSidebar = Props['sidebar']
+export type StarlightSidebar = StarlightRouteData['sidebar']
