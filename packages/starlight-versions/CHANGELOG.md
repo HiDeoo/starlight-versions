@@ -1,5 +1,19 @@
 # starlight-versions
 
+## 0.5.0
+
+### Minor Changes
+
+- [#18](https://github.com/HiDeoo/starlight-versions/pull/18) [`a68d559`](https://github.com/HiDeoo/starlight-versions/commit/a68d55958731e03d6c3b6ddf04eb5775a75a6862) Thanks [@HiDeoo](https://github.com/HiDeoo)! - ⚠️ **BREAKING CHANGE:** The Starlight Versions plugin no longer [overrides](https://starlight.astro.build/guides/overriding-components/) the [`<Sidebar>`](https://starlight.astro.build/reference/overrides/#sidebar) and [`<Pagination>`](https://starlight.astro.build/reference/overrides/#pagination) components. If you were manually rendering `starlight-versions/components/VersionSidebar.astro` or `starlight-versions/components/VersionPagination.astro` in a custom override, you can now remove them.
+
+- [#18](https://github.com/HiDeoo/starlight-versions/pull/18) [`a68d559`](https://github.com/HiDeoo/starlight-versions/commit/a68d55958731e03d6c3b6ddf04eb5775a75a6862) Thanks [@HiDeoo](https://github.com/HiDeoo)! - ⚠️ **BREAKING CHANGE:** The minimum supported version of Starlight is now version `0.32.0`.
+
+  Please use the `@astrojs/upgrade` command to upgrade your project:
+
+  ```sh
+  npx @astrojs/upgrade
+  ```
+
 ## 0.4.0
 
 ### Minor Changes
