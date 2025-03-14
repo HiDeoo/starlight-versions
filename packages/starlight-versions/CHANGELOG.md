@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.5.1
+
+### Patch Changes
+
+- [#21](https://github.com/HiDeoo/starlight-versions/pull/21) [`42be6e3`](https://github.com/HiDeoo/starlight-versions/commit/42be6e30a54fcdd5bec0959b7f354a1bc3954c14) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes a potential link generation issue when using the Astro [`base`](https://docs.astro.build/en/reference/configuration-reference/#base) option.
+
 ## 0.5.0
 
 ### Minor Changes
