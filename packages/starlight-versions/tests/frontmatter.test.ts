@@ -158,6 +158,39 @@ Test`,
     `)
   })
 
+  test('updates hero action links with a base', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+hero:
+  actions:
+    - text: Test 1
+      link: /base/test1/
+    - text: Test 2
+      link: https://example.com/
+---
+
+Test`,
+      { ...getTestContext(), base: '/base' },
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "---
+      title: Test
+      hero:
+        actions:
+          - text: Test 1
+            link: /base/2.0.1/test1/
+          - text: Test 2
+            link: https://example.com/
+      slug: 2.0.1/test
+      ---
+
+      Test
+      "
+    `)
+  })
+
   test('updates hero file image', async () => {
     const result = await transformMarkdown(
       `---
@@ -231,6 +264,7 @@ Test`,
 function getTestContext(): TransformContext {
   return {
     assets: [],
+    base: '',
     locale: undefined,
     slug: 'test',
     url: new URL('src/content/docs/test.md', import.meta.url),
