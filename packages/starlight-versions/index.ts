@@ -33,7 +33,7 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
         if (command !== 'dev' && command !== 'build') return
 
         try {
-          await ensureNewVersion(config, starlightConfig, astroConfig.srcDir, logger)
+          await ensureNewVersion(config, starlightConfig, astroConfig, logger)
         } catch (error) {
           throwPluginError(
             error instanceof Error ? error.message : 'An error occurred while creating a new documentation version.',

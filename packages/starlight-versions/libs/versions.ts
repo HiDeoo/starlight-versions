@@ -1,5 +1,5 @@
 import type { StarlightConfig } from '@astrojs/starlight/types'
-import type { AstroIntegrationLogger } from 'astro'
+import type { AstroConfig, AstroIntegrationLogger } from 'astro'
 import { z } from 'astro/zod'
 
 import type { StarlightVersionsConfig } from '..'
@@ -55,10 +55,10 @@ export const VersionSchema = z
 export async function ensureNewVersion(
   config: StarlightVersionsConfig,
   starlightConfig: StarlightUserConfig,
-  srcDir: URL,
+  astroConfig: AstroConfig,
   logger: AstroIntegrationLogger,
 ) {
-  const docsDir = new URL('content/docs/', srcDir)
+  const docsDir = new URL('content/docs/', astroConfig.srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
   const locales = Object.keys(starlightConfig.locales ?? {})
 
@@ -98,6 +98,7 @@ export async function ensureNewVersion(
 
     const md = await transformMarkdown(entry.content, {
       assets: [],
+      base: stripTrailingSlash(astroConfig.base),
       locale: getDocLocale(slug, starlightConfig),
       slug,
       url: entry.url,
@@ -113,7 +114,7 @@ export async function ensureNewVersion(
     await copyFile(asset.source, asset.dest)
   }
 
-  await makeVersionConfig(newVersion, starlightConfig, srcDir)
+  await makeVersionConfig(newVersion, starlightConfig, astroConfig.srcDir)
 
   logger.info(`Created new version '${newVersion.slug}'.`)
 }

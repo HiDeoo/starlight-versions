@@ -187,8 +187,19 @@ function handleImports(node: MdxjsEsm, file: VFile) {
 function addVersionToLink(link: string, file: VFile) {
   assert(file.data.version, 'A version must be provided to add a version to an Astro asset.')
 
+  const base = file.data.base ?? ''
+  const hasBase = file.data.base && link.startsWith(file.data.base)
+
+  if (hasBase) {
+    link = link.replace(base, '')
+  }
+
   const segments = link.split('/')
   segments.splice(1, 0, file.data.version.slug)
+
+  if (hasBase) {
+    segments.splice(1, 0, stripLeadingSlash(base))
+  }
 
   return segments.join('/')
 }
@@ -235,6 +246,7 @@ function isPublicAsset(asset: string) {
 
 export interface TransformContext {
   assets: VersionAsset[]
+  base: string
   locale: string | undefined
   slug: string
   url: URL
