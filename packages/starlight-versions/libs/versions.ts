@@ -5,7 +5,15 @@ import { z } from 'astro/zod'
 import type { StarlightVersionsConfig } from '..'
 import type { DocsVersionsConfig } from '../schema'
 
-import { copyDirectory, copyFile, ensureDirectory, listDirectory, readJSONFile, writeJSONFile } from './fs'
+import {
+  copyDirectory,
+  copyFile,
+  ensureDirectory,
+  isDirectoryEntry,
+  listDirectory,
+  readJSONFile,
+  writeJSONFile,
+} from './fs'
 import { transformMarkdown } from './markdown'
 import { ensureTrailingSlash, getExtension, stripExtension, stripLeadingSlash, stripTrailingSlash } from './path'
 import { throwPluginError } from './plugin'
@@ -317,7 +325,13 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   let newVersion: Version | undefined
 
   const docsDirEntries = await listDirectory(docsDir)
-  const docsDirDirectories = new Set(docsDirEntries.filter((entry) => entry.isDirectory()).map((dirent) => dirent.name))
+  const docsDirDirectories = new Set<string>()
+
+  for (const entry of docsDirEntries) {
+    if (await isDirectoryEntry(entry)) {
+      docsDirDirectories.add(entry.name)
+    }
+  }
 
   for (const version of config.versions) {
     if (!docsDirDirectories.has(version.slug)) {

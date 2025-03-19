@@ -1,5 +1,6 @@
-import type { PathLike } from 'node:fs'
+import type { Dirent, PathLike } from 'node:fs'
 import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import { ensureTrailingSlash } from './path'
 
@@ -58,6 +59,17 @@ export async function readJSONFile<T extends object>(file: PathLike): Promise<T>
 
 export function ensureDirectory(directory: PathLike) {
   return fs.mkdir(directory, { recursive: true })
+}
+
+// Checks if the entry is a directory or a symbolic link to a directory.
+export async function isDirectoryEntry(entry: Dirent) {
+  if (entry.isDirectory()) return true
+  if (!entry.isSymbolicLink()) return false
+
+  const entryPath = path.join(entry.parentPath, entry.name)
+  const stats = await fs.stat(entryPath)
+
+  return stats.isDirectory()
 }
 
 export type CopyDirectoryCallback = (
