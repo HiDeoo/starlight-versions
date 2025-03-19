@@ -6,7 +6,7 @@ import url from 'node:url'
 import glob from 'fast-glob'
 import { describe, expect, test, vi } from 'vitest'
 
-import { copyDirectory, type CopyDirectoryCallback } from '../libs/fs'
+import { copyDirectory, isDirectoryEntry, listDirectory, type CopyDirectoryCallback } from '../libs/fs'
 import { ensureTrailingSlash } from '../libs/path'
 
 describe('copyDirectory', () => {
@@ -203,6 +203,28 @@ describe('copyDirectory', () => {
     expect(await fs.readFile(new URL('index.md', dest), 'utf8')).toEqual('updated content')
 
     await fs.rm(dest, { recursive: true })
+  })
+})
+
+describe('isDirectoryEntry', () => {
+  test('returns `true` for a directory entry or a symbolic link to a directory', async () => {
+    const source = getFixtureURL('symlinks')
+    const entries = await listDirectory(source)
+
+    const dirEntries: string[] = []
+
+    for (const entry of entries) {
+      if (await isDirectoryEntry(entry)) {
+        dirEntries.push(entry.name)
+      }
+    }
+
+    expect(dirEntries).toMatchInlineSnapshot(`
+      [
+        "dir",
+        "symlink-dir",
+      ]
+    `)
   })
 })
 
