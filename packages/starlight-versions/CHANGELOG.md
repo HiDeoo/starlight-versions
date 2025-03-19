@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.5.2
+
+### Patch Changes
+
+- [#24](https://github.com/HiDeoo/starlight-versions/pull/24) [`113cb97`](https://github.com/HiDeoo/starlight-versions/commit/113cb975b6acc3dc3dc6d1c252048e62248dc9ed) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes an issue with symlinked version directories.
+
 ## 0.5.1
 
 ### Patch Changes
