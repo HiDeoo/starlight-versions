@@ -35,6 +35,15 @@ describe('addPrefixToSidebarConfig', () => {
     `)
   })
 
+  test('prefix links to the home page', () => {
+    expect(addPrefixToSidebarConfig('4.0', ['', 'index'])).toMatchInlineSnapshot(`
+      [
+        "4.0",
+        "4.0",
+      ]
+    `)
+  })
+
   test('prefix root links', () => {
     expect(
       addPrefixToSidebarConfig('3.0', [
@@ -110,7 +119,7 @@ describe('addPrefixToSidebarConfig', () => {
     `)
   })
 
-  test('prefasdasdaix links in groups', () => {
+  test('prefix links in groups', () => {
     expect(
       addPrefixToSidebarConfig('3.0', [
         { slug: 'test-root-1' },

@@ -76,6 +76,7 @@ export function addPrefixToSidebarConfig(
 }
 
 function addPrefixToSlug(prefix: string, slug: string) {
+  if (slug === '' || slug === 'index') return prefix
   return `${prefix}/${slug}`
 }
 
