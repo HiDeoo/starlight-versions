@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.5.3
+
+### Patch Changes
+
+- [#29](https://github.com/HiDeoo/starlight-versions/pull/29) [`3cc3e30`](https://github.com/HiDeoo/starlight-versions/commit/3cc3e30d6b778c7615cee9c2fcb01f6225b6cb84) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes an issue with versioned sidebars including a link to the homepage.
+
 ## 0.5.2
 
 ### Patch Changes
