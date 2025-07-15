@@ -108,6 +108,7 @@ export async function ensureNewVersion(
       assets: [],
       base: stripTrailingSlash(astroConfig.base),
       locale: getDocLocale(slug, starlightConfig),
+      publicDir: astroConfig.publicDir,
       slug,
       url: entry.url,
       version: newVersion,
