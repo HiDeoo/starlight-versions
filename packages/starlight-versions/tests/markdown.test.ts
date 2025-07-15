@@ -19,6 +19,10 @@ describe('transformMarkdown', () => {
 This is a note
 :::
 
+:::tip[Custom Title]
+This is a tip with a custom title
+:::
+
 \`\`\`js title=src/index.js
 console.log('Hello, world!')
 \`\`\``,
@@ -35,6 +39,10 @@ console.log('Hello, world!')
 
       :::note
       This is a note
+      :::
+
+      :::tip[Custom Title]
+      This is a tip with a custom title
       :::
 
       \`\`\`js title=src/index.js
