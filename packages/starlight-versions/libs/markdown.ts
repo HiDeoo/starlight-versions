@@ -223,12 +223,12 @@ function addVersionToAstroAsset(asset: string, file: VFile) {
 function addVersionToPublicAsset(asset: string, file: VFile) {
   assert(file.data.version, 'A version must be provided to add a version to an public asset.')
 
-  const source = new URL(asset, file.data.url)
+  const source = new URL(`.${asset}`, file.data.publicDir)
 
   const segments = asset.split('/')
   segments.splice(-1, 0, file.data.version.slug)
 
-  addVersionAsset(file, { source, dest: new URL(segments.join('/'), file.data.url) })
+  addVersionAsset(file, { source, dest: new URL(`.${segments.join('/')}`, file.data.publicDir) })
 
   return segments.join('/')
 }
@@ -249,6 +249,7 @@ export interface TransformContext {
   assets: VersionAsset[]
   base: string
   locale: string | undefined
+  publicDir: URL
   slug: string
   url: URL
   version: Version

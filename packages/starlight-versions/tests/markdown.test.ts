@@ -265,6 +265,7 @@ async function transformTestMarkdown(markdown: string) {
     assets: [],
     base: '',
     locale: undefined,
+    publicDir: new URL(import.meta.url),
     slug: 'test',
     url: new URL('src/content/docs/test.md', import.meta.url),
     version: {
