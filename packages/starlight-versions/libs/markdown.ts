@@ -4,6 +4,7 @@ import type { Image, Link, Root } from 'mdast'
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx'
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm'
 import { remark } from 'remark'
+import remarkDirective from 'remark-directive'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdx from 'remark-mdx'
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
@@ -18,7 +19,7 @@ const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
 
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
-const processor = remark().use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
+const processor = remark().use(remarkDirective).use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
   const file = await processor.process({
