@@ -1,5 +1,13 @@
 # starlight-versions
 
+## 0.5.4
+
+### Patch Changes
+
+- [#37](https://github.com/HiDeoo/starlight-versions/pull/37) [`7812488`](https://github.com/HiDeoo/starlight-versions/commit/7812488c665786bcfb6256cc9d3e342f9090cbcb) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fix an issue where public assets could fail to be versioned correctly.
+
+- [#35](https://github.com/HiDeoo/starlight-versions/pull/35) [`6014403`](https://github.com/HiDeoo/starlight-versions/commit/60144036971ee871c3195bc2a6567b6aa33734b7) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes an issue with asides using custom titles not being rendered correctly when versioned.
+
 ## 0.5.3
 
 ### Patch Changes
