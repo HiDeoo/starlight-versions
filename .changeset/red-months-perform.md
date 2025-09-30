@@ -2,4 +2,4 @@
 'starlight-versions': patch
 ---
 
-Update link generation to handle locale if present
+Fixes potential issue with link generation in multilingual projects.
