@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.5.5
+
+### Patch Changes
+
+- [#42](https://github.com/HiDeoo/starlight-versions/pull/42) [`3b68fbc`](https://github.com/HiDeoo/starlight-versions/commit/3b68fbc511dbe80c7d4b79ebe5ebc0b9f8d06c9d) Thanks [@mkurapov](https://github.com/mkurapov)! - Fixes potential issue with link generation in multilingual projects.
+
 ## 0.5.4
 
 ### Patch Changes
