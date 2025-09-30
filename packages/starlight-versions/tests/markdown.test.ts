@@ -67,6 +67,15 @@ console.log('Hello, world!')
     `)
   })
 
+  test('transforms Markdown absolute internal links in multilingual projects', async () => {
+    const result = await transformTestMarkdown(`[Test](/fr/test/)`, { locale: 'fr' })
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "[Test](/fr/2.0/test/)
+      "
+    `)
+  })
+
   test('transforms HTML absolute internal links', async () => {
     const result = await transformTestMarkdown(`<a href="https://example.com/">Test 1</a>
 <a href="/test/">Test 2</a>
@@ -78,6 +87,15 @@ console.log('Hello, world!')
       <a href="/2.0/test/">Test 2</a>
       <a href="./test/">Test 3</a>
       <a href="../test/">Test 4</a>
+      "
+    `)
+  })
+
+  test('transforms HTML absolute internal links in multilingual projects', async () => {
+    const result = await transformTestMarkdown(`<a href="/fr/test/">Test</a>`, { locale: 'fr' })
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "<a href="/fr/2.0/test/">Test</a>
       "
     `)
   })
@@ -260,7 +278,7 @@ import test8 from '../../assets/test8.png';
   })
 })
 
-async function transformTestMarkdown(markdown: string) {
+async function transformTestMarkdown(markdown: string, context: TransformTestContext = {}) {
   const result = await transformMarkdown(markdown, {
     assets: [],
     base: '',
@@ -272,6 +290,7 @@ async function transformTestMarkdown(markdown: string) {
       slug: '2.0',
       redirect: 'same-page',
     },
+    ...context,
   })
 
   return {
@@ -279,3 +298,5 @@ async function transformTestMarkdown(markdown: string) {
     content: result.content.replace(/^---\n(?:.|\n)*---\n\n/, ''),
   }
 }
+
+type TransformTestContext = Partial<Parameters<typeof transformMarkdown>[1]>

@@ -196,7 +196,11 @@ function addVersionToLink(link: string, file: VFile) {
   }
 
   const segments = link.split('/')
-  segments.splice(1, 0, file.data.version.slug)
+
+  let slugVersionIndex = 1
+  if (file.data.locale && segments[1] === file.data.locale) slugVersionIndex = 2
+
+  segments.splice(slugVersionIndex, 0, file.data.version.slug)
 
   if (hasBase) {
     segments.splice(1, 0, stripLeadingSlash(base))
