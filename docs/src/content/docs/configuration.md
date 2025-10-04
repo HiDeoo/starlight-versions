@@ -132,4 +132,4 @@ The version [redirect strategy](#redirect-strategies) used when navigating to th
 When navigating to a different version, the plugin supports two redirect strategies:
 
 - `same-page`: Redirect to the same page when navigating to this version.
-- `root`: Redirect to the root page of the documentation when to this version.
+- `root`: Redirect to the root page of the documentation when navigating to this version.
