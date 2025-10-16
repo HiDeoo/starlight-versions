@@ -1,6 +1,6 @@
 {
   "name": "starlight-versions",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "license": "MIT",
   "description": "Starlight plugin to version documentation pages.",
   "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",

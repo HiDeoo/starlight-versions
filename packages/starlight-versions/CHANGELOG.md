@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.5.6
+
+### Patch Changes
+
+- [#45](https://github.com/HiDeoo/starlight-versions/pull/45) [`c1f34d7`](https://github.com/HiDeoo/starlight-versions/commit/c1f34d7a2c6a98bd92987e2511f7199b358d9a7a) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Setups trusted publishing using OpenID Connect (OIDC) authentication — no code changes.
+
 ## 0.5.5
 
 ### Patch Changes
