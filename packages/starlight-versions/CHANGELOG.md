@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.6.0
+
+### Minor Changes
+
+- [#50](https://github.com/HiDeoo/starlight-versions/pull/50) [`983229b`](https://github.com/HiDeoo/starlight-versions/commit/983229b1d907f5bba1e774df40545db21cbb4206) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Adds support for translating the plugin's UI strings.
+
 ## 0.5.6
 
 ### Patch Changes
