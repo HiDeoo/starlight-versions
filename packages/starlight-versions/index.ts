@@ -4,6 +4,7 @@ import { StarlightVersionsConfigSchema, type StarlightVersionsUserConfig } from 
 import { overrideComponents, throwPluginError } from './libs/plugin'
 import { ensureNewVersion, getVersionedSidebar } from './libs/versions'
 import { vitePluginStarlightVersions } from './libs/vite'
+import { Translations } from './translations'
 
 export type { StarlightVersionsConfig, StarlightVersionsUserConfig } from './libs/config'
 
@@ -21,6 +22,9 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
   return {
     name: 'starlight-versions-plugin',
     hooks: {
+      'i18n:setup'({ injectTranslations }) {
+        injectTranslations(Translations)
+      },
       async 'config:setup'({
         addIntegration,
         addRouteMiddleware,

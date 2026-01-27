@@ -1,0 +1,25 @@
+---
+title: Internationalization (i18n)
+description: Learn how to configure multiple languages with the Starlight Versions plugin.
+---
+
+The Starlight Versions plugin relies on Starlight's built-in support for [internationalization](https://starlight.astro.build/guides/i18n/) to provide multilingual support for your versioned documentation.
+
+See the [Starlight internationalization documentation](https://starlight.astro.build/guides/i18n/) for more information on how to configure i18n in your Starlight website.
+
+## Configure i18n
+
+Configure internationalization in your Starlight project by following the Starlight [“Configure i18n”](https://starlight.astro.build/guides/i18n/#configure-i18n) guide.
+
+## Translate the UI
+
+The Starlight Versions plugin allows you to translate the default UI strings used in the versioned documentation so that your documentation can be fully localized and readers can enjoy a seamless experience in their preferred language.
+
+import { I18n } from '@hideoo/starlight-plugins-docs-components'
+
+<I18n
+  label="Starlight Versions"
+  translations={
+    import('../../../../../packages/starlight-versions/translations')
+  }
+/>

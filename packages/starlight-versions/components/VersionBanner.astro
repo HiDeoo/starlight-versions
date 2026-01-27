@@ -13,10 +13,16 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
 {
   pageVersion && template === 'splash' && (
     <div>
-      This content is for {pageVersion.label ?? `the ${pageVersion.slug} version`}. Switch to the
-      {/* prettier-ignore */}
-      <a href={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}>latest version</a>
-      for up-to-date documentation.
+      {pageVersion.label ? (
+        <Fragment set:html={Astro.locals.t('starlightVersions.outdated.label', { label: pageVersion.label })} />
+      ) : (
+        <Fragment set:html={Astro.locals.t('starlightVersions.outdated.slug', { slug: pageVersion.slug })} />
+      )}{' '}
+      <Fragment
+        set:html={Astro.locals.t('starlightVersions.link.latest', {
+          link: getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname,
+        })}
+      />
     </div>
   )
 }
@@ -32,7 +38,7 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
     text-wrap: balance;
   }
 
-  div a {
+  div :global(a) {
     color: var(--sl-color-orange-high);
   }
 </style>
