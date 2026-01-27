@@ -12,7 +12,7 @@ const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig,
 
 <starlight-version-select>
   <label>
-    <span class="sr-only">Select version</span>
+    <span class="sr-only">{Astro.locals.t('starlightVersions.select.accessibleLabel')}</span>
     <Icon name="seti:clock" class="icon label-icon" />
     <select value={pageVersion?.label ?? 'current'} autocomplete="off">
       <option

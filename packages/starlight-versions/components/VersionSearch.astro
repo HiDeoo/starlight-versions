@@ -35,7 +35,7 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 ---
 
 <site-search class={Astro.props['class']} {...dataAttributes}>
-  <button data-open-modal disabled>
+  <button data-open-modal disabled aria-label={Astro.locals.t('search.label')} aria-keyshortcuts="Control+K">
     <Icon name="magnifier" />
     <span class="sl-hidden md:sl-block" aria-hidden="true">{Astro.locals.t('search.label')}</span>
     <kbd class="sl-hidden md:sl-flex" style="display: none;">
@@ -60,10 +60,22 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
                 <div class="starlight-versions-pagefind-notice">
                   <Icon name="seti:clock" size="1em" color="var(--sl-color-orange-high)" />
                   <span>
-                    Search limited to {pageVersion.label ?? `the ${pageVersion.slug} version`}. Switch to the
-                    {/* prettier-ignore */}
-                    <a href={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}>latest version</a>
-                    for up-to-date results.
+                    {pageVersion.label ? (
+                      <Fragment
+                        set:html={Astro.locals.t('starlightVersions.search.outdated.label', {
+                          label: pageVersion.label,
+                        })}
+                      />
+                    ) : (
+                      <Fragment
+                        set:html={Astro.locals.t('starlightVersions.search.outdated.slug', { slug: pageVersion.slug })}
+                      />
+                    )}{' '}
+                    <Fragment
+                      set:html={Astro.locals.t('starlightVersions.search.link.latest', {
+                        link: getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname,
+                      })}
+                    />
                   </span>
                 </div>
               )}
@@ -97,6 +109,8 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 </script>
 
 <script>
+  import { pagefindUserConfig } from 'virtual:starlight/pagefind-config'
+
   class SiteSearch extends HTMLElement {
     constructor() {
       super()
@@ -163,6 +177,7 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
           // @ts-expect-error — Missing types for @pagefind/default-ui package.
           const { PagefindUI } = await import('@pagefind/default-ui')
           const search = new PagefindUI({
+            ...pagefindUserConfig,
             element: '#starlight__search',
             baseUrl: import.meta.env.BASE_URL,
             bundlePath: `${import.meta.env.BASE_URL.replace(/\/$/, '')}/pagefind/`,
@@ -282,12 +297,13 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
   }
 
   #starlight__search {
-    --pagefind-ui-primary: var(--sl-color-accent-light);
+    --pagefind-ui-primary: var(--sl-color-text);
     --pagefind-ui-text: var(--sl-color-gray-2);
     --pagefind-ui-font: var(--__sl-font);
     --pagefind-ui-background: var(--sl-color-black);
     --pagefind-ui-border: var(--sl-color-gray-5);
     --pagefind-ui-border-width: 1px;
+    --pagefind-ui-tag: var(--sl-color-gray-5);
     --sl-search-cancel-space: 5rem;
 
     display: flex;
@@ -497,6 +513,16 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
     color: var(--sl-color-gray-2);
     background-color: transparent;
     font-weight: 600;
+  }
+
+  #starlight__search .pagefind-ui__filter-value::before {
+    border-color: var(--sl-color-text-invert);
+  }
+
+  #starlight__search .pagefind-ui__result-tags {
+    background-color: var(--sl-color-black);
+    margin-top: 0;
+    padding: var(--sl-search-result-nested-pad-block) var(--sl-search-result-pad-inline-end);
   }
 
   #starlight__search .pagefind-ui__filter-panel {

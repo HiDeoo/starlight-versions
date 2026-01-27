@@ -21,3 +21,9 @@ declare module 'virtual:starlight/project-context' {
   }
   export default ProjectContext
 }
+
+declare module 'virtual:starlight/pagefind-config' {
+  export const pagefindUserConfig: Partial<
+    Extract<import('@astrojs/starlight/types').StarlightConfig['pagefind'], object>
+  >
+}
