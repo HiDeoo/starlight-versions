@@ -2,4 +2,4 @@
 'starlight-versions': minor
 ---
 
-Adds support for translating the Starlight Versions plugin UI strings.
+Adds support for translating the plugin's UI strings.
