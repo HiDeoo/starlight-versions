@@ -1,5 +1,15 @@
 # starlight-versions
 
+## 0.7.0
+
+### Minor Changes
+
+- [#52](https://github.com/HiDeoo/starlight-versions/pull/52) [`6342b0d`](https://github.com/HiDeoo/starlight-versions/commit/6342b0d8c5954aa3202589127e56a32b3f572537) Thanks [@mierak](https://github.com/mierak)! - Adds support for versioning assets imported as strings using Vite `?raw` suffix.
+
+### Patch Changes
+
+- [#55](https://github.com/HiDeoo/starlight-versions/pull/55) [`658c5cc`](https://github.com/HiDeoo/starlight-versions/commit/658c5ccebba78e3108e94050cdaaf7d7b5736da1) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes a potential sidebar link generation issue where links were not correctly prefixed by a version.
+
 ## 0.6.0
 
 ### Minor Changes
