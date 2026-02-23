@@ -197,6 +197,26 @@ import test8 from '../../assets/test8.png';
     expectVersionAssetToMatch(result.assets?.[7], /\/test10\.png$/, /\/2\.0\/test10\.png$/)
   })
 
+  test('transforms import paths and copies assets imported as strings', async () => {
+    const result = await transformTestMarkdown(`import { Code } from "@astrojs/starlight/components";
+import exampleConfig from "../../assets/example-config.json?raw";
+
+<Code code={exampleConfig} lang="json" title="config.json" />`)
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "import { Code } from "@astrojs/starlight/components";
+      import exampleConfig from "../../../assets/2.0/example-config.json?raw";
+
+      <Code code={exampleConfig} lang="json" title="config.json" />
+      "
+    `)
+
+    expectVersionAssetsToHaveLength(result.assets, 1)
+
+    expect(result.assets?.[0]?.source.pathname).toMatch(/\/src\/assets\/example-config\.json$/)
+    expect(result.assets?.[0]?.dest.pathname).toMatch(/\/src\/assets\/2\.0\/example-config\.json$/)
+  })
+
   test('transforms HTML audio elements', async () => {
     const result = await transformTestMarkdown(`<audio src="https://example.com/test1.mp3"></audio>
 <audio src="/test2.mp3"></audio>
