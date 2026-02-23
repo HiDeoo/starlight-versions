@@ -66,7 +66,7 @@ export function addPrefixToSidebarConfig(
     }
 
     const segments = item.link.split('/')
-    segments.splice(1, 0, prefix)
+    segments.splice(/^[./]/.test(item.link) ? 1 : 0, 0, prefix)
 
     return {
       ...item,
