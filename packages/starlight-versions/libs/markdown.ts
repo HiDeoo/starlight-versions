@@ -15,7 +15,7 @@ import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version, VersionAsset } from './versions'
 
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
-const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif)$/i
+const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif|.+\?raw)$/i
 
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
