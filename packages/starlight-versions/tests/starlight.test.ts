@@ -50,6 +50,7 @@ describe('addPrefixToSidebarConfig', () => {
         { label: 'Test 1', link: '/test-1/' },
         { label: 'Test 2', link: './test-2/' },
         { label: 'Test 3', link: '/' },
+        { label: 'Test 4', link: 'test-4' },
       ]),
     ).toMatchInlineSnapshot(`
       [
@@ -65,6 +66,10 @@ describe('addPrefixToSidebarConfig', () => {
           "label": "Test 3",
           "link": "/3.0/",
         },
+        {
+          "label": "Test 4",
+          "link": "3.0/test-4",
+        },
       ]
     `)
   })
@@ -77,6 +82,7 @@ describe('addPrefixToSidebarConfig', () => {
           items: [
             { label: 'Test 1', link: '/group/test-1/' },
             { label: 'Test 2', link: './group/test-2/' },
+            { label: 'Test 3', link: 'group/test-3' },
           ],
         },
       ]),
@@ -91,6 +97,10 @@ describe('addPrefixToSidebarConfig', () => {
             {
               "label": "Test 2",
               "link": "./3.0/group/test-2/",
+            },
+            {
+              "label": "Test 3",
+              "link": "3.0/group/test-3",
             },
           ],
           "label": "Group",
