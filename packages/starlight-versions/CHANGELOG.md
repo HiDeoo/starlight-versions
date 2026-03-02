@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.7.1
+
+### Patch Changes
+
+- [#57](https://github.com/HiDeoo/starlight-versions/pull/57) [`669cb51`](https://github.com/HiDeoo/starlight-versions/commit/669cb51da8f92541a08ea84bfc1fb6dd5624f903) Thanks [@trueberryless](https://github.com/trueberryless)! - Adds German UI translations
+
 ## 0.7.0
 
 ### Minor Changes
