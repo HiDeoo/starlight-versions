@@ -7,7 +7,7 @@ import { getVersionFromSlug, getVersionURL } from '../libs/versions'
 const { entry } = Astro.locals.starlightRoute
 const { template } = Astro.locals.starlightRoute.entry.data
 
-const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
+const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.id)
 ---
 
 {

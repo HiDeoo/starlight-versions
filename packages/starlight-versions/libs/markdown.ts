@@ -186,7 +186,7 @@ function handleImports(node: MdxjsEsm, file: VFile) {
 }
 
 function addVersionToLink(link: string, file: VFile) {
-  assert(file.data.version, 'A version must be provided to add a version to an Astro asset.')
+  assert.ok(file.data.version, 'A version must be provided to add a version to an Astro asset.')
 
   const base = file.data.base ?? ''
   const hasBase = file.data.base && link.startsWith(file.data.base)
@@ -210,7 +210,7 @@ function addVersionToLink(link: string, file: VFile) {
 }
 
 function addVersionToAstroAsset(asset: string, file: VFile) {
-  assert(file.data.version, 'A version must be provided to add a version to an Astro asset.')
+  assert.ok(file.data.version, 'A version must be provided to add a version to an Astro asset.')
 
   const source = new URL(asset, file.data.url)
 
@@ -225,7 +225,7 @@ function addVersionToAstroAsset(asset: string, file: VFile) {
 }
 
 function addVersionToPublicAsset(asset: string, file: VFile) {
-  assert(file.data.version, 'A version must be provided to add a version to an public asset.')
+  assert.ok(file.data.version, 'A version must be provided to add a version to an public asset.')
 
   const source = new URL(`.${asset}`, file.data.publicDir)
 

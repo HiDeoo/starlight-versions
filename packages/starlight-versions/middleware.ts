@@ -9,11 +9,11 @@ export const onRequest = defineRouteMiddleware((context) => {
   const { entry, locale, pagination, sidebar } = starlightRoute
 
   starlightRoute.sidebar = getVersionSidebar(
-    getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug),
+    getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.id),
     sidebar,
   )
 
-  const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.slug)
+  const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.id)
 
   starlightRoute.pagination.prev = getPaginationLink(locale, pageVersion, pagination.prev)
   starlightRoute.pagination.next = getPaginationLink(locale, pageVersion, pagination.next)

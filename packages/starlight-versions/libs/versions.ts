@@ -40,25 +40,24 @@ export const VersionBaseSchema = z.object({
   redirect: z.union([z.literal('root'), z.literal('same-page')]).default('same-page'),
 })
 
-export const VersionSchema = z
-  .object({
-    /**
-     * An optional label used in the UI when displaying the version.
-     * If not provided, the version slug is used.
-     *
-     * @example 'v2.0'
-     * @example 'v3.1.2'
-     */
-    label: z.string().optional(),
-    /**
-     * The version slug used in URLs to identify the version and its content.
-     *
-     * @example '2.0'
-     * @example '3-1-2'
-     */
-    slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
-  })
-  .merge(VersionBaseSchema)
+export const VersionSchema = z.object({
+  ...VersionBaseSchema.shape,
+  /**
+   * An optional label used in the UI when displaying the version.
+   * If not provided, the version slug is used.
+   *
+   * @example 'v2.0'
+   * @example 'v3.1.2'
+   */
+  label: z.string().optional(),
+  /**
+   * The version slug used in URLs to identify the version and its content.
+   *
+   * @example '2.0'
+   * @example '3-1-2'
+   */
+  slug: z.string().refine((value) => stripLeadingSlash(stripTrailingSlash(value))),
+})
 
 export async function ensureNewVersion(
   config: StarlightVersionsConfig,
