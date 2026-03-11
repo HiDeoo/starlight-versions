@@ -9,6 +9,7 @@ export const StarlightVersionsConfigSchema = z
      */
     current: z
       .object({
+        ...VersionBaseSchema.shape,
         /**
          * The label used in the UI to represent the current version.
          *
@@ -16,8 +17,7 @@ export const StarlightVersionsConfigSchema = z
          */
         label: z.string().default('Latest'),
       })
-      .merge(VersionBaseSchema)
-      .default({}),
+      .prefault({}),
     /**
      * A list of all archived versions of the documentation.
      */

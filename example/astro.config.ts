@@ -48,10 +48,18 @@ export default defineConfig({
           autogenerate: { directory: 'guides' },
         },
       ],
-      social: {
-        blueSky: 'https://bsky.app/profile/hideoo.dev',
-        github: 'https://github.com/HiDeoo/starlight-versions',
-      },
+      social: [
+        {
+          href: 'https://bsky.app/profile/hideoo.dev',
+          icon: 'blueSky',
+          label: 'Bluesky',
+        },
+        {
+          href: 'https://github.com/HiDeoo/starlight-versions',
+          icon: 'github',
+          label: 'GitHub',
+        },
+      ],
       title: 'Starlight Versions Example',
     }),
   ],
