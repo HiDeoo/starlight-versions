@@ -1,4 +1,5 @@
 import type { StarlightPlugin } from '@astrojs/starlight/types'
+import { z } from 'astro/zod'
 
 import { StarlightVersionsConfigSchema, type StarlightVersionsUserConfig } from './libs/config'
 import { overrideComponents, throwPluginError } from './libs/plugin'
@@ -13,7 +14,10 @@ export default function starlightVersionsPlugin(userConfig: StarlightVersionsUse
 
   if (!parsedConfig.success) {
     throwPluginError(
-      `The provided plugin configuration is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`,
+      `Invalid starlight-versions configuration:
+
+${z.prettifyError(parsedConfig.error)}
+`,
     )
   }
 
