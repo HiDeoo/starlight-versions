@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.8.1
+
+### Patch Changes
+
+- [#62](https://github.com/HiDeoo/starlight-versions/pull/62) [`3b6b14a`](https://github.com/HiDeoo/starlight-versions/commit/3b6b14a1e55f13aaf289e822f10dcead916e6c12) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Improves the error message logged when the plugin configuration is invalid.
+
 ## 0.8.0
 
 ### Minor Changes
