@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.8.2
+
+### Patch Changes
+
+- [#64](https://github.com/HiDeoo/starlight-versions/pull/64) [`5e26275`](https://github.com/HiDeoo/starlight-versions/commit/5e262755d6b8f61ba4c17f59f32ff0fa0ff87938) Thanks [@Hexalyse](https://github.com/Hexalyse)! - Fixes a Windows-only issue where archived docs could generate incorrect routes.
+
 ## 0.8.1
 
 ### Patch Changes
