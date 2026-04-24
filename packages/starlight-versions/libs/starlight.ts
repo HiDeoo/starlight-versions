@@ -18,7 +18,7 @@ export function getFrontmatterNodeValue(frontmatter: StarlightFrontmatter) {
 }
 
 export function getDocSlug(docsDir: URL, doc: URL) {
-  const docPath = path.relative(url.fileURLToPath(docsDir), url.fileURLToPath(doc))
+  const docPath = path.relative(url.fileURLToPath(docsDir), url.fileURLToPath(doc)).replaceAll('\\', '/')
   const slug = slugifyPath(docPath)
 
   return slug === 'index' ? '/' : slug.replace(/\/index$/, '')

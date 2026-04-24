@@ -1,4 +1,6 @@
-import { describe, expect, test } from 'vitest'
+import path from 'node:path'
+
+import { describe, expect, test, vi } from 'vitest'
 
 import { addPrefixToSidebarConfig, getDocSlug } from '../libs/starlight'
 
@@ -19,6 +21,26 @@ describe('getDocSlug', () => {
 
   test('handles nested files', () => {
     expect(getDocSlug(docsDir, new URL('guides/examples/test.mdx', docsDir))).toBe('guides/examples/test')
+  })
+
+  test('handles Windows-style nested files', () => {
+    const relativeSpy = vi.spyOn(path, 'relative').mockReturnValue(String.raw`guides\examples\test.mdx`)
+
+    try {
+      expect(getDocSlug(docsDir, new URL('guides/examples/test.mdx', docsDir))).toBe('guides/examples/test')
+    } finally {
+      relativeSpy.mockRestore()
+    }
+  })
+
+  test('handles Windows-style nested index files', () => {
+    const relativeSpy = vi.spyOn(path, 'relative').mockReturnValue(String.raw`guides\examples\index.mdx`)
+
+    try {
+      expect(getDocSlug(docsDir, new URL('guides/examples/index.mdx', docsDir))).toBe('guides/examples')
+    } finally {
+      relativeSpy.mockRestore()
+    }
   })
 })
 
