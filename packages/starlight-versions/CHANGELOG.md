@@ -1,5 +1,17 @@
 # starlight-versions
 
+## 0.9.0
+
+### Minor Changes
+
+- [#68](https://github.com/HiDeoo/starlight-versions/pull/68) [`e313164`](https://github.com/HiDeoo/starlight-versions/commit/e31316400efde94bf27ac1b577e8867beecb27df) Thanks [@HiDeoo](https://github.com/HiDeoo)! - ⚠️ **BREAKING CHANGE:** The minimum supported version of Starlight is now `0.39.0`.
+
+  Please use the `@astrojs/upgrade` command to upgrade your project:
+
+  ```sh
+  npx @astrojs/upgrade
+  ```
+
 ## 0.8.2
 
 ### Patch Changes
