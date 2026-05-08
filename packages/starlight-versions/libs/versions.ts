@@ -303,7 +303,7 @@ async function getSidebarVersionGroup(version: Version, srcDir: URL) {
   if (!versionConfig.sidebar) {
     return {
       label: version.slug,
-      autogenerate: { directory: version.slug },
+      items: [{ autogenerate: { directory: version.slug } }],
     }
   }
 
