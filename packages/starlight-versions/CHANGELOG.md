@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.9.1
+
+### Patch Changes
+
+- [#73](https://github.com/HiDeoo/starlight-versions/pull/73) [`4dec2d6`](https://github.com/HiDeoo/starlight-versions/commit/4dec2d697cf2529c56668d9b4882aef8d2a7756e) Thanks [@FredySandoval](https://github.com/FredySandoval)! - Adds Spanish UI translations
+
 ## 0.9.0
 
 ### Minor Changes
