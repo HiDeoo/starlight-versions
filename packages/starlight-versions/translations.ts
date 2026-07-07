@@ -19,4 +19,15 @@ export const Translations = {
     'starlightVersions.search.outdated.slug': 'Suche nur in der Version {{slug}}.',
     'starlightVersions.select.accessibleLabel': 'Version auswählen',
   },
+  es: {
+    'starlightVersions.link.latest':
+      'Cambia a la <a href={{link}}>versión más reciente</a> para consultar la documentación actualizada.',
+    'starlightVersions.outdated.label': 'Este contenido es para {{label}}.',
+    'starlightVersions.outdated.slug': 'Este contenido es para la versión {{slug}}.',
+    'starlightVersions.search.link.latest': 
+      'Cambia a la <a href={{link}}>versión más reciente</a> para obtener resultados actualizados.',
+    'starlightVersions.search.outdated.label': 'Búsqueda limitada a {{label}}.',
+    'starlightVersions.search.outdated.slug': 'Búsqueda limitada a la versión {{slug}}.',
+    'starlightVersions.select.accessibleLabel': 'Seleccionar versión',
+  },
 }
