@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { slug } from 'github-slugger'
 
-const absoluteLinkRegex = /^https?:\/\//
+const absoluteLinkRegex = /^[a-z][a-z\d+.-]*:/i
 
 export function ensureTrailingSlash(filePath: string): string {
   if (filePath.endsWith('/')) {
@@ -26,6 +26,10 @@ export function stripTrailingSlash(filePath: string) {
   }
 
   return filePath.slice(0, -1)
+}
+
+export function stripLeadingAndTrailingSlashes(filePath: string) {
+  return stripLeadingSlash(stripTrailingSlash(filePath))
 }
 
 export function slugifyPath(filePath: string): string {

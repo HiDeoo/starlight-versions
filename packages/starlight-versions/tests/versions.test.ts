@@ -4,7 +4,17 @@ import type { StarlightConfig, StarlightUserConfig } from '@astrojs/starlight/ty
 import { describe, expect, test, vi } from 'vitest'
 
 import { StarlightVersionsConfigSchema, type StarlightVersionsConfig } from '../libs/config'
-import { getVersionFromPaginationLink, getVersionFromSlug, getVersionURL, type Version } from '../libs/versions'
+import type { StarlightSidebar } from '../libs/starlight'
+import {
+  addExcludedLinksToVersionSidebar,
+  getCanonicalSlug,
+  getPagefindVersionIdentifiers,
+  isExcludedDocPath,
+  getVersionFromPaginationLink,
+  getVersionFromSlug,
+  getVersionURL,
+  type Version,
+} from '../libs/versions'
 
 describe('getVersionFromSlug', () => {
   const starlightBasicConfig = createTestStarlightConfig({ title: 'basics' })
@@ -178,6 +188,34 @@ describe('getVersionFromPaginationLink', () => {
   })
 })
 
+describe('isExcludedDocPath', () => {
+  const config = StarlightVersionsConfigSchema.parse({
+    exclude: ['guides/test.md'],
+    versions: [createTestVersion('1.0')],
+  })
+
+  test.for(['src/content/docs/guides/test.md', String.raw`src\content\docs\guides\test.md`])(
+    'matches the excluded source path %s',
+    (filePath) => {
+      expect(isExcludedDocPath(config, filePath)).toBe(true)
+    },
+  )
+})
+
+describe('getPagefindVersionIdentifiers', () => {
+  const archivedVersion = createTestVersion('1.0')
+
+  const config = StarlightVersionsConfigSchema.parse({ versions: [archivedVersion, createTestVersion('2.0')] })
+  config.excludedSlugsByVersion['2.0'] = ['guides/test']
+
+  test.for([
+    { version: undefined, expected: ['current', '2.0'] },
+    { version: archivedVersion, expected: ['1.0'] },
+  ])('returns Pagefind version identifiers for current and archived pages', ({ version, expected }) => {
+    expect(getPagefindVersionIdentifiers(config, version, 'guides/test')).toEqual(expected)
+  })
+})
+
 describe('getVersionURL', () => {
   const starlightBasicConfig = createTestStarlightConfig({ title: 'basics' })
   const starlightI18nConfig = createTestStarlightConfig({
@@ -202,6 +240,21 @@ describe('getVersionURL', () => {
     locales: {
       fr: { label: 'Français', lang: 'fr-CA' },
     },
+  })
+
+  test('uses the canonical URL for excluded pages', () => {
+    const archivedVersion = createTestVersion('2.0')
+
+    const config = StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('1.0'), archivedVersion] })
+    config.excludedSlugsByVersion[archivedVersion.slug] = ['guides/test']
+
+    expectVersionURL(
+      config,
+      starlightBasicConfig,
+      '/1.0/guides/test/?foo=bar#baz',
+      archivedVersion,
+      '/guides/test/?foo=bar#baz',
+    )
   })
 
   describe("with `redirect: 'root'`", () => {
@@ -741,8 +794,72 @@ describe('getVersionURL', () => {
   })
 })
 
+describe('addExcludedLinksToVersionSidebar', () => {
+  test('adds excluded links to versioned sidebar', () => {
+    const current: StarlightSidebar = [
+      manualGroup('Docs', [
+        autoLink('/guides/a/', 'A', ''),
+        autoGroup('Guides', '', [autoLink('/guides/test/', 'Test', ''), autoLink('/guides/z/', 'Z', '')]),
+      ]),
+    ]
+
+    const archived: StarlightSidebar = [
+      manualGroup('Docs', [
+        autoLink('/1.0/guides/a/', 'A', '1.0'),
+        autoGroup('Guides', '1.0', [autoLink('/1.0/guides/z/', 'Z', '1.0')]),
+      ]),
+    ]
+
+    addExcludedLinksToVersionSidebar(
+      current,
+      archived,
+      createTestVersion('1.0'),
+      ['guides/test'],
+      new URL('https://example.com'),
+    )
+
+    expect(archived).toMatchObject([
+      {
+        entries: [{ href: '/1.0/guides/a/' }, { entries: [{ href: '/guides/test/' }, { href: '/1.0/guides/z/' }] }],
+      },
+    ])
+  })
+})
+
+describe('getCanonicalSlug', () => {
+  test('returns the canonical slug for a localized URL with a base', () => {
+    vi.stubEnv('BASE_URL', '/docs')
+
+    expect(
+      getCanonicalSlug(
+        StarlightVersionsConfigSchema.parse({ versions: [createTestVersion('1.0')] }),
+        createTestStarlightConfig({ title: 'i18n', locales: { fr: { label: 'French' } } }),
+        new URL('https://example.com/docs/fr/1.0/guides/test/'),
+      ),
+    ).toBe('fr/guides/test')
+
+    vi.unstubAllEnvs()
+  })
+})
+
 function createTestVersion(slug: string, redirect: Version['redirect'] = 'same-page'): Version {
   return { slug, redirect }
+}
+
+function manualGroup(label: string, entries: StarlightSidebar): Extract<StarlightSidebar[number], { type: 'group' }> {
+  return { type: 'group', label, entries, collapsed: false, badge: undefined }
+}
+
+function autoLink(href: string, label: string, directory: string): Extract<StarlightSidebar[number], { type: 'link' }> {
+  return { type: 'link', href, label, isCurrent: false, badge: undefined, attrs: {}, autogenerate: { directory } }
+}
+
+function autoGroup(
+  label: string,
+  directory: string,
+  entries: StarlightSidebar,
+): Extract<StarlightSidebar[number], { type: 'group' }> {
+  return { type: 'group', label, entries, collapsed: false, badge: undefined, autogenerate: { directory } }
 }
 
 function createTestStarlightConfig(userConfig: Partial<StarlightUserConfig>): StarlightConfig {

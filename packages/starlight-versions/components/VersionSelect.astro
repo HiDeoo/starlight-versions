@@ -3,37 +3,41 @@ import { Icon } from '@astrojs/starlight/components'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
-import { getVersionFromSlug, getVersionURL } from '../libs/versions'
+import { getVersionFromSlug, getVersionURL, isExcludedDocPath } from '../libs/versions'
 
-const { id } = Astro.locals.starlightRoute
+const { entry, id } = Astro.locals.starlightRoute
 
 const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, id)
+const isExcluded = pageVersion === undefined && isExcludedDocPath(starlightVersionsConfig, entry.filePath)
 ---
 
-<starlight-version-select>
-  <label>
-    <span class="sr-only">{Astro.locals.t('starlightVersions.select.accessibleLabel')}</span>
-    <Icon name="seti:clock" class="icon label-icon" />
-    <select value={pageVersion?.label ?? 'current'} autocomplete="off">
-      <option
-        selected={pageVersion === undefined}
-        value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}
-        >{starlightVersionsConfig.current.label}</option
-      >
-      {
-        starlightVersionsConfig.versions.map((version) => (
+{
+  !isExcluded && (
+    <starlight-version-select>
+      <label>
+        <span class="sr-only">{Astro.locals.t('starlightVersions.select.accessibleLabel')}</span>
+        <Icon name="seti:clock" class="icon label-icon" />
+        <select value={pageVersion?.label ?? 'current'} autocomplete="off">
           <option
-            selected={version.slug === pageVersion?.slug}
-            value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, version).pathname}
+            selected={pageVersion === undefined}
+            value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, undefined).pathname}
           >
-            {version.label ?? version.slug}
+            {starlightVersionsConfig.current.label}
           </option>
-        ))
-      }
-    </select>
-    <Icon name="down-caret" class="icon caret-icon" />
-  </label>
-</starlight-version-select>
+          {starlightVersionsConfig.versions.map((version) => (
+            <option
+              selected={version.slug === pageVersion?.slug}
+              value={getVersionURL(starlightVersionsConfig, starlightConfig, Astro.url, version).pathname}
+            >
+              {version.label ?? version.slug}
+            </option>
+          ))}
+        </select>
+        <Icon name="down-caret" class="icon caret-icon" />
+      </label>
+    </starlight-version-select>
+  )
+}
 
 <style>
   label {

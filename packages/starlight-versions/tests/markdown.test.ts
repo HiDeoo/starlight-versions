@@ -76,6 +76,37 @@ console.log('Hello, world!')
     `)
   })
 
+  test.for([
+    {
+      content: '[Test](../../test/?foo=bar#baz)',
+      expected: '[Test](/docs/fr/test/?foo=bar#baz)',
+    },
+    {
+      content: '<a href="../../test/?foo=bar#baz">Test</a>',
+      expected: '<a href="/docs/fr/test/?foo=bar#baz">Test</a>',
+    },
+  ])('transforms excluded internal links to canonical URLs', async ({ content, expected }) => {
+    const result = await transformTestMarkdown(content, {
+      base: '/docs',
+      locale: 'fr',
+      slug: 'fr/guides/page',
+      excludedSlugs: ['fr/test'],
+    })
+
+    expect(result.content.trim()).toBe(expected)
+  })
+
+  test('preserves absolute links to excluded pages', async () => {
+    const result = await transformTestMarkdown('[Test](/docs/fr/test/)', {
+      base: '/docs',
+      locale: 'fr',
+      slug: 'fr/guides/page',
+      excludedSlugs: ['fr/test'],
+    })
+
+    expect(result.content.trim()).toBe('[Test](/docs/fr/test/)')
+  })
+
   test('transforms HTML absolute internal links', async () => {
     const result = await transformTestMarkdown(`<a href="https://example.com/">Test 1</a>
 <a href="/test/">Test 2</a>
@@ -302,6 +333,7 @@ async function transformTestMarkdown(markdown: string, context: TransformTestCon
   const result = await transformMarkdown(markdown, {
     assets: [],
     base: '',
+    excludedSlugs: [],
     locale: undefined,
     publicDir: new URL(import.meta.url),
     slug: 'test',

@@ -44,6 +44,16 @@ See the [version configuration](#version-configuration) section or the [“Creat
 The configuration for the current version of the documentation.
 See the [current version configuration](#version-configuration) section for more details.
 
+### `exclude`
+
+**Type:** `string[]`  
+**Default:** `[]`
+
+A list of source file glob patterns for pages that should be excluded from versioning.
+Excluded pages use the latest content regardless of the selected version.
+
+Patterns are relative to the `src/content/docs/` directory, for example `internal/**` excludes all pages in the `src/content/docs/internal/` directory from versioning.
+
 ## Version configuration
 
 A version configuration object is used to define a version.
