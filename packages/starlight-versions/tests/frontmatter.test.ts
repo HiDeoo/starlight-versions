@@ -125,6 +125,21 @@ Test`,
     `)
   })
 
+  test('resolves excluded prev/next links to their canonical URLs', async () => {
+    const result = await transformMarkdown(
+      `---
+title: Test
+prev:
+  link: ../test/?foo=bar#baz
+---
+
+Test`,
+      { ...getTestContext(), slug: 'guides/page', excludedSlugs: ['guides/test'] },
+    )
+
+    expect(result.content).toContain('link: /guides/test/?foo=bar#baz')
+  })
+
   test('updates hero action links', async () => {
     const result = await transformMarkdown(
       `---
@@ -268,6 +283,7 @@ function getTestContext(): TransformContext {
     locale: undefined,
     publicDir: new URL(import.meta.url),
     slug: 'test',
+    excludedSlugs: [],
     url: new URL('src/content/docs/test.md', import.meta.url),
     version: {
       slug: '2.0.1',

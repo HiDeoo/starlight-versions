@@ -10,7 +10,7 @@ import project from 'virtual:starlight/project-context'
 import starlightConfig from 'virtual:starlight/user-config'
 import starlightVersionsConfig from 'virtual:starlight-versions-config'
 
-import { getVersionFromSlug, getVersionIdentifier, getVersionURL } from '../libs/versions'
+import { getPagefindVersionIdentifiers, getVersionFromSlug, getVersionURL } from '../libs/versions'
 
 const { entry } = Astro.locals.starlightRoute
 
@@ -24,7 +24,11 @@ const pagefindTranslations = {
 }
 
 const pageVersion = getVersionFromSlug(starlightVersionsConfig, starlightConfig, entry.id)
-const pageVersionIdentifier = getVersionIdentifier(pageVersion)
+const [pageVersionIdentifier, ...otherPageVersionsIdentifiers] = getPagefindVersionIdentifiers(
+  starlightVersionsConfig,
+  pageVersion,
+  entry.id,
+)
 
 const dataAttributes: DOMStringMap = {
   'data-pagefind-filter': `version:${pageVersionIdentifier}`,
@@ -35,6 +39,7 @@ if (project.trailingSlash === 'never') dataAttributes['data-strip-trailing-slash
 ---
 
 <site-search class={Astro.props['class']} {...dataAttributes}>
+  {otherPageVersionsIdentifiers.map((version) => <span hidden data-pagefind-filter={`version:${version}`} />)}
   <button data-open-modal disabled aria-label={Astro.locals.t('search.label')} aria-keyshortcuts="Control+K">
     <Icon name="magnifier" />
     <span class="sl-hidden md:sl-block" aria-hidden="true">{Astro.locals.t('search.label')}</span>

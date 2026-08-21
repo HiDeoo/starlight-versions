@@ -10,7 +10,7 @@ import remarkMdx from 'remark-mdx'
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
 import type { VFile } from 'vfile'
 
-import { isAbsoluteLink, stripLeadingSlash, stripTrailingSlash } from './path'
+import { isAbsoluteLink, stripLeadingAndTrailingSlashes, stripLeadingSlash, stripTrailingSlash } from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version, VersionAsset } from './versions'
 
@@ -51,6 +51,10 @@ export function remarkStarlightVersions() {
           return handleImports(node, file)
         }
         case 'mdxJsxFlowElement': {
+          if (node.name === 'a') {
+            return handleLinkElements(node, file)
+          }
+
           if (node.name && mediaElements.has(node.name)) {
             return handleMediaElements(node, file)
           }
@@ -99,19 +103,17 @@ function handleFrontmatter(tree: Root, file: VFile) {
       }
     }
 
-    if (typeof frontmatter.prev === 'object' && frontmatter.prev.link?.startsWith('/')) {
-      frontmatter.prev.link = addVersionToLink(frontmatter.prev.link, file)
+    if (typeof frontmatter.prev === 'object' && frontmatter.prev.link) {
+      frontmatter.prev.link = transformLink(frontmatter.prev.link, file)
     }
 
-    if (typeof frontmatter.next === 'object' && frontmatter.next.link?.startsWith('/')) {
-      frontmatter.next.link = addVersionToLink(frontmatter.next.link, file)
+    if (typeof frontmatter.next === 'object' && frontmatter.next.link) {
+      frontmatter.next.link = transformLink(frontmatter.next.link, file)
     }
 
     if (frontmatter.hero?.actions) {
       for (const action of frontmatter.hero.actions) {
-        if (action.link.startsWith('/')) {
-          action.link = addVersionToLink(action.link, file)
-        }
+        action.link = transformLink(action.link, file)
       }
     }
 
@@ -134,21 +136,46 @@ function handleFrontmatter(tree: Root, file: VFile) {
 }
 
 function handleLinks(node: Link, file: VFile) {
-  if (!isPublicAsset(node.url)) return SKIP
-
-  node.url = addVersionToLink(node.url, file)
+  node.url = transformLink(node.url, file)
 
   return SKIP
 }
 
-function handleLinkElements(node: MdxJsxTextElement, file: VFile) {
+function handleLinkElements(node: MdxJsxFlowElement | MdxJsxTextElement, file: VFile) {
   const href = node.attributes.find((attribute) => attribute.type === 'mdxJsxAttribute' && attribute.name === 'href')
 
-  if (!href || typeof href.value !== 'string' || !isPublicAsset(href.value)) return CONTINUE
+  if (!href || typeof href.value !== 'string') return CONTINUE
 
-  href.value = addVersionToLink(href.value, file)
+  href.value = transformLink(href.value, file)
 
   return CONTINUE
+}
+
+function transformLink(link: string, file: VFile) {
+  if (isAbsoluteLink(link)) return link
+
+  const excludedLink = getExcludedLink(link, file)
+  if (excludedLink) return excludedLink
+
+  return isPublicAsset(link) ? addVersionToLink(link, file) : link
+}
+
+function getExcludedLink(link: string, file: VFile) {
+  const { excludedSlugs, slug } = file.data
+
+  if (!excludedSlugs || !slug || link.startsWith('#') || link.startsWith('?')) return undefined
+
+  const isAbsolute = link.startsWith('/')
+  const url = new URL(link, `https://example.com/${stripLeadingAndTrailingSlashes(slug)}/`)
+  let pathname = url.pathname
+  const base = file.data.base ?? ''
+
+  if (base && (pathname === base || pathname.startsWith(`${base}/`))) pathname = pathname.slice(base.length)
+
+  if (!excludedSlugs.includes(stripLeadingAndTrailingSlashes(pathname))) return undefined
+  if (isAbsolute) return link
+
+  return `${base}${pathname}${url.search}${url.hash}`
 }
 
 function handleImages(node: Image, file: VFile) {
@@ -252,6 +279,7 @@ function isPublicAsset(asset: string) {
 export interface TransformContext {
   assets: VersionAsset[]
   base: string
+  excludedSlugs: string[]
   locale: string | undefined
   publicDir: URL
   slug: string
