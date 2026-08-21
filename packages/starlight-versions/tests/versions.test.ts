@@ -172,14 +172,14 @@ describe('getVersionFromPaginationLink', () => {
     const expectedSlug = '3.0'
     const expectedVersion = createTestVersion(expectedSlug)
 
-    vi.stubEnv('BASE_URL', '/test')
+    vi.stubEnv('BASE_URL', '/docs/test')
 
     expect(
       getVersionFromPaginationLink(
         StarlightVersionsConfigSchema.parse({
           versions: [createTestVersion('2.0'), expectedVersion, createTestVersion('4.0')],
         }),
-        `/test/${expectedSlug}/`,
+        `/docs/test/${expectedSlug}/`,
         undefined,
       ),
     ).toStrictEqual(expectedVersion)
@@ -255,6 +255,23 @@ describe('getVersionURL', () => {
       archivedVersion,
       '/guides/test/?foo=bar#baz',
     )
+  })
+
+  test('does not match a partial base segment', () => {
+    const version = createTestVersion('3.0')
+    const config = StarlightVersionsConfigSchema.parse({ versions: [version] })
+
+    vi.stubEnv('BASE_URL', '/docs')
+
+    expectVersionURL(
+      config,
+      starlightBasicConfig,
+      '/docs-old/guides/example/',
+      version,
+      '/3.0/docs-old/guides/example/',
+    )
+
+    vi.unstubAllEnvs()
   })
 
   describe("with `redirect: 'root'`", () => {

@@ -221,10 +221,10 @@ export function getVersionURL(
   const versionRedirect = version?.redirect ?? config.current.redirect
 
   const base = stripTrailingSlash(import.meta.env.BASE_URL)
-  const hasBase = versionURL.pathname.startsWith(base)
+  const hasBase = versionURL.pathname === base || versionURL.pathname.startsWith(ensureTrailingSlash(base))
 
   if (hasBase) {
-    versionURL.pathname = versionURL.pathname.replace(base, '')
+    versionURL.pathname = versionURL.pathname.slice(base.length)
   }
 
   let baseSegment: string | undefined
@@ -447,12 +447,9 @@ export function getVersionFromPaginationLink(
   link: string,
   locale: string | undefined,
 ): Version | undefined {
-  const [, ...segments] = link.split('/')
-
-  if (import.meta.env.BASE_URL !== '/') {
-    // Remove the base segment if configured.
-    segments.splice(0, 1)
-  }
+  const base = stripTrailingSlash(import.meta.env.BASE_URL)
+  const pathname = link === base || link.startsWith(ensureTrailingSlash(base)) ? link.slice(base.length) : link
+  const segments = stripLeadingAndTrailingSlashes(pathname).split('/')
 
   if (locale) {
     // Remove the locale segment if the current locale is not a root locale.

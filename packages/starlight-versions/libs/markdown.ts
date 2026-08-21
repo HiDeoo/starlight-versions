@@ -10,7 +10,13 @@ import remarkMdx from 'remark-mdx'
 import { CONTINUE, SKIP, visit } from 'unist-util-visit'
 import type { VFile } from 'vfile'
 
-import { isAbsoluteLink, stripLeadingAndTrailingSlashes, stripLeadingSlash, stripTrailingSlash } from './path'
+import {
+  ensureTrailingSlash,
+  isAbsoluteLink,
+  stripLeadingAndTrailingSlashes,
+  stripLeadingSlash,
+  stripTrailingSlash,
+} from './path'
 import { getFrontmatterNodeValue, parseFrontmatter } from './starlight'
 import type { Version, VersionAsset } from './versions'
 
@@ -170,7 +176,9 @@ function getExcludedLink(link: string, file: VFile) {
   let pathname = url.pathname
   const base = file.data.base ?? ''
 
-  if (base && (pathname === base || pathname.startsWith(`${base}/`))) pathname = pathname.slice(base.length)
+  if (base && (pathname === base || pathname.startsWith(ensureTrailingSlash(base)))) {
+    pathname = pathname.slice(base.length)
+  }
 
   if (!excludedSlugs.includes(stripLeadingAndTrailingSlashes(pathname))) return undefined
   if (isAbsolute) return link
@@ -216,10 +224,10 @@ function addVersionToLink(link: string, file: VFile) {
   assert.ok(file.data.version, 'A version must be provided to add a version to an Astro asset.')
 
   const base = file.data.base ?? ''
-  const hasBase = file.data.base && link.startsWith(file.data.base)
+  const hasBase = base && (link === base || link.startsWith(ensureTrailingSlash(base)))
 
   if (hasBase) {
-    link = link.replace(base, '')
+    link = link.slice(base.length)
   }
 
   const segments = link.split('/')

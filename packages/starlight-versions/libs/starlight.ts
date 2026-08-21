@@ -7,7 +7,13 @@ import type { HookParameters } from '@astrojs/starlight/types'
 import type { z } from 'astro/zod'
 import yaml from 'yaml'
 
-import { isAbsoluteLink, slugifyPath, stripLeadingAndTrailingSlashes, stripTrailingSlash } from './path'
+import {
+  ensureTrailingSlash,
+  isAbsoluteLink,
+  slugifyPath,
+  stripLeadingAndTrailingSlashes,
+  stripTrailingSlash,
+} from './path'
 
 const frontmatterRegex = /^---\r?\n(?<yaml>.*?)\r?\n---(?:\r?\n|$)/s
 const queryOrFragmentRegex = /[?#]/
@@ -42,7 +48,7 @@ export function getURLSlug(url: URL) {
   let pathname = decodeURI(url.pathname)
 
   const base = stripTrailingSlash(import.meta.env.BASE_URL)
-  if (pathname.startsWith(base)) pathname = pathname.replace(base, '')
+  if (pathname === base || pathname.startsWith(ensureTrailingSlash(base))) pathname = pathname.slice(base.length)
 
   const segments = pathname.split('/')
   const htmlExt = '.html'
