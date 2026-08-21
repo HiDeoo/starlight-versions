@@ -1,5 +1,17 @@
 # starlight-versions
 
+## 0.10.0
+
+### Minor Changes
+
+- [#76](https://github.com/HiDeoo/starlight-versions/pull/76) [`a4134e7`](https://github.com/HiDeoo/starlight-versions/commit/a4134e7ac0df8778367f4ada77c3b5ee8976cc06) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Adds support for excluding pages from versioning.
+
+### Patch Changes
+
+- [#79](https://github.com/HiDeoo/starlight-versions/pull/79) [`4329441`](https://github.com/HiDeoo/starlight-versions/commit/4329441a853506584a2e9c43429b83a14a5152a6) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes pagination links when using Astro's `base` configuration option with multiple segments.
+
+- [#79](https://github.com/HiDeoo/starlight-versions/pull/79) [`4329441`](https://github.com/HiDeoo/starlight-versions/commit/4329441a853506584a2e9c43429b83a14a5152a6) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes invalid versioned links for paths similar to Astro's `base` configuration option.
+
 ## 0.9.1
 
 ### Patch Changes
