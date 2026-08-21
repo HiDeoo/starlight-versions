@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { addPrefixToSidebarConfig, getDocSlug } from '../libs/starlight'
+import { addPrefixToSidebarConfig, getDocSlug, getURLSlug } from '../libs/starlight'
 
 describe('getDocSlug', () => {
   const docsDir = new URL('content/docs/', import.meta.url)
@@ -282,5 +282,15 @@ describe('addPrefixToSidebarConfig', () => {
         },
       ]
     `)
+  })
+})
+
+describe('getURLSlug', () => {
+  test('does not strip a partial base segment', () => {
+    vi.stubEnv('BASE_URL', '/docs')
+
+    expect(getURLSlug(new URL('https://example.com/docs-old/guides/test/'))).toBe('docs-old/guides/test')
+
+    vi.unstubAllEnvs()
   })
 })

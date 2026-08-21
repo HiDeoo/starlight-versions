@@ -76,6 +76,12 @@ console.log('Hello, world!')
     `)
   })
 
+  test('does not match a partial base segment', async () => {
+    const result = await transformTestMarkdown('[Test](/docs-old/page/)', { base: '/docs' })
+
+    expect(result.content.trim()).toBe('[Test](/2.0/docs-old/page/)')
+  })
+
   test.for([
     {
       content: '[Test](../../test/?foo=bar#baz)',
