@@ -4,6 +4,11 @@ import path from 'node:path'
 
 import { ensureTrailingSlash } from './path'
 
+// The content file extensions supported by Starlight, which are the only files in a docs
+// directory whose content is transformed when a new version is created. Astro's own
+// SUPPORTED_MARKDOWN_FILE_EXTENSIONS list, plus the MDX and Markdoc integration extensions.
+const contentFileRegex = /\.(md|markdown|mdown|mkdn|mkd|mdwn|mdx|mdoc)$/i
+
 export function listDirectory(directory: URL) {
   return fs.readdir(directory, { withFileTypes: true })
 }
@@ -32,13 +37,24 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       await copyDirectory(source, dest, callback, false)
     } else if (entry.isFile()) {
       const source = new URL(entry.name, sourceDir)
+      const dest = new URL(entry.name, destDir)
+
+      // Only content files are read as text and handed to the callback. Reading any other
+      // file as utf8 and writing the result back replaces every byte sequence that is not
+      // valid utf8 with U+FFFD, which destroys colocated binary assets such as the images
+      // in a page bundle, so those are copied verbatim instead.
+      if (!contentFileRegex.test(entry.name)) {
+        await copyFile(source, dest)
+        continue
+      }
+
       const content = await fs.readFile(source, 'utf8')
 
       const updatedContent = await callback({ type: 'file', content, url: source })
 
       if (typeof updatedContent !== 'string') continue
 
-      await fs.writeFile(new URL(entry.name, destDir), updatedContent)
+      await fs.writeFile(dest, updatedContent)
     }
   }
 }
