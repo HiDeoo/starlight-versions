@@ -4,11 +4,6 @@ import path from 'node:path'
 
 import { ensureTrailingSlash } from './path'
 
-// The content file extensions supported by Starlight, which are the only files in a docs
-// directory whose content is transformed when a new version is created. Astro's own
-// SUPPORTED_MARKDOWN_FILE_EXTENSIONS list, plus the MDX and Markdoc integration extensions.
-const contentFileRegex = /\.(md|markdown|mdown|mkdn|mkd|mdwn|mdx|mdoc)$/i
-
 export function listDirectory(directory: URL) {
   return fs.readdir(directory, { withFileTypes: true })
 }
@@ -37,24 +32,17 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       await copyDirectory(source, dest, callback, false)
     } else if (entry.isFile()) {
       const source = new URL(entry.name, sourceDir)
+
+      const updatedContent = await callback({ type: 'file', url: source })
+      if (updatedContent === true) continue
+
       const dest = new URL(entry.name, destDir)
 
-      // Only content files are read as text and handed to the callback. Reading any other
-      // file as utf8 and writing the result back replaces every byte sequence that is not
-      // valid utf8 with U+FFFD, which destroys colocated binary assets such as the images
-      // in a page bundle, so those are copied verbatim instead.
-      if (!contentFileRegex.test(entry.name)) {
+      if (updatedContent === undefined) {
         await copyFile(source, dest)
-        continue
+      } else if (typeof updatedContent === 'string') {
+        await fs.writeFile(dest, updatedContent)
       }
-
-      const content = await fs.readFile(source, 'utf8')
-
-      const updatedContent = await callback({ type: 'file', content, url: source })
-
-      if (typeof updatedContent !== 'string') continue
-
-      await fs.writeFile(dest, updatedContent)
     }
   }
 }
@@ -88,8 +76,12 @@ export async function isDirectoryEntry(entry: Dirent) {
   return stats.isDirectory()
 }
 
+/**
+ * Defines how entries are handled when copying a directory with `copyDirectory()`.
+ *
+ * - For files, return `undefined` to copy as-is, a string to write transformed content, or `true` to skip.
+ * - For directories, return `undefined` to use the default destination, a `URL` to override it, or `true` to skip.
+ */
 export type CopyDirectoryCallback = (
-  entry:
-    | { type: 'file'; content: string; url: URL }
-    | { type: 'directory'; name: string; isRoot: boolean; source: URL; dest: URL },
-) => Promise<string | boolean | URL>
+  entry: { type: 'file'; url: URL } | { type: 'directory'; name: string; isRoot: boolean; source: URL; dest: URL },
+) => Promise<string | true | URL | undefined>

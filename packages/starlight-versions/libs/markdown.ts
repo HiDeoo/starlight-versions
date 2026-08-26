@@ -246,8 +246,10 @@ function addVersionToLink(link: string, file: VFile) {
 
 function addVersionToAstroAsset(asset: string, file: VFile) {
   assert.ok(file.data.version, 'A version must be provided to add a version to an Astro asset.')
+  assert.ok(file.data.docsDir, 'A docs directory must be provided to add a version to an Astro asset.')
 
   const source = new URL(asset, file.data.url)
+  if (source.href.startsWith(file.data.docsDir.href)) return asset
 
   const segments = asset.split('/')
   segments.splice(-1, 0, file.data.version.slug)
@@ -287,6 +289,7 @@ function isPublicAsset(asset: string) {
 export interface TransformContext {
   assets: VersionAsset[]
   base: string
+  docsDir: URL
   excludedSlugs: string[]
   locale: string | undefined
   publicDir: URL

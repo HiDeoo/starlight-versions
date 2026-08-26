@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import url from 'node:url'
+import { gzipSync } from 'node:zlib'
 
 import glob from 'fast-glob'
 import { describe, expect, test, vi } from 'vitest'
@@ -76,16 +77,30 @@ describe('copyDirectory', () => {
     await fs.rm(dest, { recursive: true })
   })
 
+  test('copies assets as-is', async () => {
+    const source = await makeTempDir()
+    const dest = await makeTempDir()
+    const content = gzipSync('asset content')
+    await fs.writeFile(new URL('asset', source), content)
+
+    await copyDirectory(source, dest, copyAllCallback)
+
+    expect(await fs.readFile(new URL('asset', dest))).toEqual(content)
+
+    await fs.rm(source, { recursive: true })
+    await fs.rm(dest, { recursive: true })
+  })
+
   test('uses the callback to filter directories to copy', async () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
     const callback = vi.fn(((entry) => {
       if (entry.type === 'directory') {
-        return Promise.resolve(entry.name === 'nested')
+        return Promise.resolve(entry.name === 'nested' ? true : undefined)
       }
 
-      return Promise.resolve('')
+      return Promise.resolve()
     }) as CopyDirectoryCallback)
 
     await copyDirectory(source, dest, callback)
@@ -108,15 +123,14 @@ describe('copyDirectory', () => {
       2,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.mdx$/) }),
       }),
     )
+    expect(callback.mock.calls[1]?.[0]).not.toHaveProperty('content')
     expect(callback).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
       }),
     )
@@ -128,7 +142,6 @@ describe('copyDirectory', () => {
       5,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
       }),
     )
@@ -136,7 +149,6 @@ describe('copyDirectory', () => {
       6,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
       }),
     )
@@ -154,7 +166,7 @@ describe('copyDirectory', () => {
         return Promise.resolve(new URL('test/', dest))
       }
 
-      return Promise.resolve('')
+      return Promise.resolve()
     }) as CopyDirectoryCallback)
 
     await copyDirectory(source, dest, callback)
@@ -166,12 +178,14 @@ describe('copyDirectory', () => {
     await fs.rm(dest, { recursive: true })
   })
 
-  test('uses the callback to update file content', async () => {
+  test('uses the callback to skip or update files', async () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
-    const callback = vi.fn(((entry) =>
-      Promise.resolve(entry.type === 'file' ? 'updated content' : true)) as CopyDirectoryCallback)
+    const callback = vi.fn(((entry) => {
+      if (entry.type === 'directory' || entry.url.pathname.endsWith('/hello.md')) return Promise.resolve(true)
+      return Promise.resolve('updated content')
+    }) as CopyDirectoryCallback)
 
     await copyDirectory(source, dest, callback)
 
@@ -185,7 +199,6 @@ describe('copyDirectory', () => {
       2,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/hello\.md$/) }),
       }),
     )
@@ -193,13 +206,12 @@ describe('copyDirectory', () => {
       3,
       expect.objectContaining({
         type: 'file',
-        content: expect.any(String),
         url: expect.objectContaining({ pathname: expect.stringMatching(/index\.md$/) }),
       }),
     )
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
-    expect(await fs.readFile(new URL('hello.md', dest), 'utf8')).toEqual('updated content')
+    expect(await getDirEntries(dest)).toEqual(['index.md'])
     expect(await fs.readFile(new URL('index.md', dest), 'utf8')).toEqual('updated content')
 
     await fs.rm(dest, { recursive: true })
@@ -228,9 +240,7 @@ describe('isDirectoryEntry', () => {
   })
 })
 
-const copyAllCallback: CopyDirectoryCallback = (entry) => {
-  return Promise.resolve(entry.type === 'directory' ? false : '')
-}
+const copyAllCallback: CopyDirectoryCallback = () => Promise.resolve(undefined)
 
 async function makeTempDir() {
   const tempDirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'starlight-versions-test-'))

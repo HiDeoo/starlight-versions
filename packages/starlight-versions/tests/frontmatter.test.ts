@@ -280,6 +280,7 @@ function getTestContext(): TransformContext {
   return {
     assets: [],
     base: '',
+    docsDir: new URL('src/content/docs/', import.meta.url),
     locale: undefined,
     publicDir: new URL(import.meta.url),
     slug: 'test',
