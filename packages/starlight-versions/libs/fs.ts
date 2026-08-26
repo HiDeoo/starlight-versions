@@ -32,13 +32,17 @@ export async function copyDirectory(sourceDir: URL, destDir: URL, callback: Copy
       await copyDirectory(source, dest, callback, false)
     } else if (entry.isFile()) {
       const source = new URL(entry.name, sourceDir)
-      const content = await fs.readFile(source, 'utf8')
 
-      const updatedContent = await callback({ type: 'file', content, url: source })
+      const updatedContent = await callback({ type: 'file', url: source })
+      if (updatedContent === true) continue
 
-      if (typeof updatedContent !== 'string') continue
+      const dest = new URL(entry.name, destDir)
 
-      await fs.writeFile(new URL(entry.name, destDir), updatedContent)
+      if (updatedContent === undefined) {
+        await copyFile(source, dest)
+      } else if (typeof updatedContent === 'string') {
+        await fs.writeFile(dest, updatedContent)
+      }
     }
   }
 }
@@ -72,8 +76,12 @@ export async function isDirectoryEntry(entry: Dirent) {
   return stats.isDirectory()
 }
 
+/**
+ * Defines how entries are handled when copying a directory with `copyDirectory()`.
+ *
+ * - For files, return `undefined` to copy as-is, a string to write transformed content, or `true` to skip.
+ * - For directories, return `undefined` to use the default destination, a `URL` to override it, or `true` to skip.
+ */
 export type CopyDirectoryCallback = (
-  entry:
-    | { type: 'file'; content: string; url: URL }
-    | { type: 'directory'; name: string; isRoot: boolean; source: URL; dest: URL },
-) => Promise<string | boolean | URL>
+  entry: { type: 'file'; url: URL } | { type: 'directory'; name: string; isRoot: boolean; source: URL; dest: URL },
+) => Promise<string | true | URL | undefined>

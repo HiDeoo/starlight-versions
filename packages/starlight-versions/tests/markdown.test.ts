@@ -137,6 +137,14 @@ console.log('Hello, world!')
     `)
   })
 
+  test('does not transform images co-located with Markdown files', async () => {
+    const result = await transformTestMarkdown('![Test](./image.png)')
+
+    expect(result.content.trim()).toBe('![Test](./image.png)')
+
+    expectVersionAssetsToHaveLength(result.assets, 0)
+  })
+
   test('transforms and copies Markdown images', async () => {
     const result = await transformTestMarkdown(`![Test 1](https://example.com/test.png)
 ![Test 2](/test.png)
@@ -339,6 +347,7 @@ async function transformTestMarkdown(markdown: string, context: TransformTestCon
   const result = await transformMarkdown(markdown, {
     assets: [],
     base: '',
+    docsDir: new URL('src/content/docs/', import.meta.url),
     excludedSlugs: [],
     locale: undefined,
     publicDir: new URL(import.meta.url),

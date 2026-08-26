@@ -40,6 +40,9 @@ import {
 
 const currentVersionSidebarGroupLabel = Symbol('StarlightVersionsCurrentVersionSidebarGroupLabel')
 
+// https://github.com/withastro/starlight/blob/23207221169b31e0cc210451a39a19c80fa1f69e/packages/starlight/loaders.ts#L6
+const docsExtensions = new Set(['.markdown', '.mdown', '.mkdn', '.mkd', '.mdwn', '.md', '.mdx'])
+
 export const VersionBaseSchema = z.object({
   /**
    * The version redirect strategy used when navigating to this version:
@@ -105,7 +108,7 @@ export async function ensureNewVersion(
         }
 
         // Do not skip other non-root directories.
-        return false
+        return
       }
 
       // Skip root version directories.
@@ -114,19 +117,21 @@ export async function ensureNewVersion(
       const localeDir = locales.find((locale) => locale === entry.name)
 
       // Copy root directories not matching any locale.
-      if (!localeDir) return false
+      if (!localeDir) return
 
       // Otherwise, swap the locale and version directories.
       return new URL(`../../${localeDir}/${newVersion.slug}/`, entry.dest)
     }
 
-    if (excludedDocs.has(getDocPath(docsDir, entry.url))) return false
+    if (!docsExtensions.has(getExtension(entry.url.pathname))) return
+    if (excludedDocs.has(getDocPath(docsDir, entry.url))) return true
 
     const slug = getDocSlug(docsDir, entry.url)
 
-    const md = await transformMarkdown(entry.content, {
+    const md = await transformMarkdown(await fs.readFile(entry.url, 'utf8'), {
       assets: [],
       base: stripTrailingSlash(astroConfig.base),
+      docsDir,
       excludedSlugs,
       locale: getDocLocale(slug, starlightConfig),
       publicDir: astroConfig.publicDir,
@@ -497,7 +502,11 @@ async function getExcludedDocs(config: StarlightVersionsConfig, locales: string[
         continue
       }
 
-      if (!entry.isFile() || !config.exclude.some((excludeGlob) => path.posix.matchesGlob(docPath, excludeGlob))) {
+      if (
+        !entry.isFile() ||
+        !docsExtensions.has(getExtension(docPath)) ||
+        !config.exclude.some((excludeGlob) => path.posix.matchesGlob(docPath, excludeGlob))
+      ) {
         continue
       }
 
