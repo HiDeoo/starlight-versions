@@ -1,5 +1,11 @@
 # starlight-versions
 
+## 0.10.1
+
+### Patch Changes
+
+- [#80](https://github.com/HiDeoo/starlight-versions/pull/80) [`dd385c8`](https://github.com/HiDeoo/starlight-versions/commit/dd385c88940cc36e5733d0f082a04907f44bb2f0) Thanks [@kozmagabor](https://github.com/kozmagabor)! - Fixes versioning of assets stored alongside documentation pages.
+
 ## 0.10.0
 
 ### Minor Changes
