@@ -182,10 +182,10 @@ describe('copyDirectory', () => {
     const source = getFixtureURL('basics')
     const dest = await makeTempDir()
 
-    const callback = vi.fn(((entry) => {
+    const callback = vi.fn<CopyDirectoryCallback>((entry) => {
       if (entry.type === 'directory' || entry.url.pathname.endsWith('/hello.md')) return Promise.resolve(true)
       return Promise.resolve('updated content')
-    }) as CopyDirectoryCallback)
+    })
 
     await copyDirectory(source, dest, callback)
 

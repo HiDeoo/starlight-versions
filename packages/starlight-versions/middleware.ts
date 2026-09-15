@@ -74,7 +74,7 @@ function getPaginationFromSidebar(
     route.pagination.prev,
   )
   const next = applyPaginationConfig(
-    currentIndex > -1 ? entries[currentIndex + 1] : undefined,
+    currentIndex === -1 ? undefined : entries[currentIndex + 1],
     starlightConfig.pagination,
     route.entry.data.next,
     route.pagination.next,
@@ -93,11 +93,12 @@ function applyPaginationConfig(
   // Explicitly remove the link.
   if (config === false) return undefined
   // Use the generated link if any.
-  else if (config === true) return link
+  if (config === true) return link
   // If a link exists, update its label if needed.
-  else if (typeof config === 'string' && link) {
+  if (typeof config === 'string' && link) {
     return { ...link, label: config }
-  } else if (typeof config === 'object') {
+  }
+  if (typeof config === 'object') {
     if (link) {
       // If a link exists, update both its label and href if needed.
       return {
@@ -107,7 +108,8 @@ function applyPaginationConfig(
         // Explicitly remove sidebar link attributes for prev/next links.
         attrs: {},
       }
-    } else if (config.link && config.label) {
+    }
+    if (config.link && config.label) {
       // If there is no link and the frontmatter contains both a URL and a label, use it.
       return existing
     }
