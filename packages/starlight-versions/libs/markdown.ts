@@ -102,7 +102,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
         if (file.data.locale && segments[0] === file.data.locale) {
           segments.splice(1, 0, file.data.version.slug)
         } else {
-          segments.splice(0, 0, file.data.version.slug)
+          segments.unshift(file.data.version.slug)
         }
 
         frontmatter.slug = segments.join('/')
@@ -232,8 +232,7 @@ function addVersionToLink(link: string, file: VFile) {
 
   const segments = link.split('/')
 
-  let slugVersionIndex = 1
-  if (file.data.locale && segments[1] === file.data.locale) slugVersionIndex = 2
+  const slugVersionIndex = file.data.locale && segments[1] === file.data.locale ? 2 : 1
 
   segments.splice(slugVersionIndex, 0, file.data.version.slug)
 
@@ -252,11 +251,11 @@ function addVersionToAstroAsset(asset: string, file: VFile) {
   if (source.href.startsWith(file.data.docsDir.href)) return asset
 
   const segments = asset.split('/')
-  segments.splice(-1, 0, file.data.version.slug)
+  segments.splice(Math.max(segments.length - 1, 0), 0, file.data.version.slug)
 
   addVersionAsset(file, { source, dest: new URL(segments.join('/'), file.data.url) })
 
-  segments.splice(0, 0, '..')
+  segments.unshift('..')
 
   return segments.join('/')
 }
@@ -267,7 +266,7 @@ function addVersionToPublicAsset(asset: string, file: VFile) {
   const source = new URL(`.${asset}`, file.data.publicDir)
 
   const segments = asset.split('/')
-  segments.splice(-1, 0, file.data.version.slug)
+  segments.splice(Math.max(segments.length - 1, 0), 0, file.data.version.slug)
 
   addVersionAsset(file, { source, dest: new URL(`.${segments.join('/')}`, file.data.publicDir) })
 

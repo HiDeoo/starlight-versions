@@ -82,16 +82,17 @@ export async function ensureNewVersion(
 ) {
   const docsDir = new URL('content/docs/', astroConfig.srcDir)
   const newVersion = await checkForNewVersion(config, docsDir)
-  const locales = Object.keys(starlightConfig.locales ?? {})
 
   if (!newVersion) return
+
+  const locales = Object.keys(starlightConfig.locales ?? {})
 
   const excludedDocs = await getExcludedDocs(
     config,
     locales.filter((locale) => locale !== 'root'),
     docsDir,
   )
-  const excludedSlugs = [...excludedDocs.values()].toSorted()
+  const excludedSlugs = excludedDocs.values().toArray().toSorted()
 
   const assets: VersionAsset[] = []
 
@@ -112,7 +113,7 @@ export async function ensureNewVersion(
       }
 
       // Skip root version directories.
-      if (entry.name in config.versionsBySlug) return true
+      if (Object.hasOwn(config.versionsBySlug, entry.name)) return true
 
       const localeDir = locales.find((locale) => locale === entry.name)
 
@@ -213,12 +214,8 @@ export function getVersionURL(
   const canonicalSlug = getCanonicalSlug(config, starlightConfig, url)
 
   if (version && isSlugExcludedFromVersion(config, version, canonicalSlug)) {
-    return getVersionURL(
-      { ...config, current: { ...config.current, redirect: 'same-page' } },
-      starlightConfig,
-      url,
-      undefined,
-    )
+    config = { ...config, current: { ...config.current, redirect: 'same-page' } }
+    version = undefined
   }
 
   const versionURL = new URL(url)
@@ -236,7 +233,7 @@ export function getVersionURL(
   let localeSegment: string | undefined
 
   const isHTML = getExtension(versionURL.pathname) === '.html'
-  const [, firstSegment, secondSegment] = versionURL.pathname.split('/')
+  const [, firstSegment, secondSegment] = versionURL.pathname.split('/', 3)
 
   if (starlightConfig.isMultilingual || starlightConfig.locales) {
     const versionOrLocale = firstSegment?.replace('.html', '')
@@ -254,11 +251,11 @@ export function getVersionURL(
   const isRootHTML = baseSegment && getExtension(baseSegment) === '.html'
   const baseSlug = baseSegment && isRootHTML ? stripExtension(baseSegment) : baseSegment
 
-  if (baseSlug && baseSlug in config.versionsBySlug) {
+  if (baseSlug && Object.hasOwn(config.versionsBySlug, baseSlug)) {
     if (versionSlug) {
       versionURL.pathname =
         versionRedirect === 'same-page'
-          ? versionURL.pathname.replace(baseSlug, versionSlug)
+          ? versionURL.pathname.replace(baseSlug, () => versionSlug)
           : `${versionSlug}${isHTML ? '.html' : '/'}`
     } else if (isRootHTML) {
       versionURL.pathname = '/index.html'
@@ -458,7 +455,7 @@ export function getVersionFromPaginationLink(
 
   if (locale) {
     // Remove the locale segment if the current locale is not a root locale.
-    segments.splice(0, 1)
+    segments.shift()
   }
 
   const versionSegment = segments[0]
@@ -488,11 +485,14 @@ async function getExcludedDocs(config: StarlightVersionsConfig, locales: string[
       const docPath = getDocPath(docsDir, entryURL)
 
       if (isDirectory) {
-        const [firstSegment, secondSegment] = docPath.split('/')
+        const [firstSegment, secondSegment] = docPath.split('/', 2)
 
         if (
-          (firstSegment && firstSegment in config.versionsBySlug) ||
-          (firstSegment && locales.includes(firstSegment) && secondSegment && secondSegment in config.versionsBySlug)
+          (firstSegment && Object.hasOwn(config.versionsBySlug, firstSegment)) ||
+          (firstSegment &&
+            secondSegment &&
+            locales.includes(firstSegment) &&
+            Object.hasOwn(config.versionsBySlug, secondSegment))
         ) {
           continue
         }
@@ -505,7 +505,7 @@ async function getExcludedDocs(config: StarlightVersionsConfig, locales: string[
       if (
         !entry.isFile() ||
         !docsExtensions.has(getExtension(docPath)) ||
-        !config.exclude.some((excludeGlob) => path.posix.matchesGlob(docPath, excludeGlob))
+        config.exclude.every((excludeGlob) => !path.posix.matchesGlob(docPath, excludeGlob))
       ) {
         continue
       }
@@ -532,12 +532,15 @@ async function checkForNewVersion(config: StarlightVersionsConfig, docsDir: URL)
   }
 
   for (const version of config.versions) {
-    if (!docsDirDirectories.has(version.slug)) {
-      if (newVersion) {
-        throw new Error('Only one new version can be configured at a time.')
-      }
-      newVersion = version
+    if (docsDirDirectories.has(version.slug)) {
+      continue
     }
+
+    if (newVersion) {
+      throw new Error('Only one new version can be configured at a time.')
+    }
+
+    newVersion = version
   }
 
   return newVersion
