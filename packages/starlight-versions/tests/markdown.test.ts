@@ -4,6 +4,8 @@ import { transformMarkdown } from '../libs/markdown'
 
 import { expectVersionAssetToMatch, expectVersionAssetsToHaveLength } from './utils'
 
+const extensions = ['md', 'mdx'] as const
+
 describe('transformMarkdown', () => {
   test('preserves existing content', async () => {
     const result = await transformTestMarkdown(
@@ -52,11 +54,64 @@ console.log('Hello, world!')
     `)
   })
 
-  test('transforms Markdown absolute internal links', async () => {
-    const result = await transformTestMarkdown(`[Test 1](https://example.com/)
+  test('preserves existing content (.md)', async () => {
+    const result = await transformTestMarkdown(
+      `<->blah
+<->blah
+
+Some text with < and > characters: a < b, b > a and a <= b.
+
+Some inline code with \`<T>\`, \`a -> b\` and \`<Component />\`.
+
+Some {curly braces} and an <!-- inline comment --> that are not MDX expressions or JSX.
+
+<!-- A comment -->
+
+<https://example.com>
+
+:::note
+This is a note with < and > characters
+:::
+
+\`\`\`js title=src/index.js
+if (a < b && b > c) console.log('Hello, world!')
+\`\`\``,
+      { extension: 'md' },
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "<->blah
+      <->blah
+
+      Some text with < and > characters: a < b, b > a and a <= b.
+
+      Some inline code with \`<T>\`, \`a -> b\` and \`<Component />\`.
+
+      Some {curly braces} and an <!-- inline comment --> that are not MDX expressions or JSX.
+
+      <!-- A comment -->
+
+      <https://example.com>
+
+      :::note
+      This is a note with < and > characters
+      :::
+
+      \`\`\`js title=src/index.js
+      if (a < b && b > c) console.log('Hello, world!')
+      \`\`\`
+      "
+    `)
+  })
+
+  test.for(extensions)('transforms Markdown absolute internal links (.%s)', async (extension) => {
+    const result = await transformTestMarkdown(
+      `[Test 1](https://example.com/)
 [Test 2](/test/)
 [Test 3](./test/)
-[Test 4](../test/)`)
+[Test 4](../test/)`,
+      { extension },
+    )
 
     expect(result.content).toMatchInlineSnapshot(`
       "[Test 1](https://example.com/)
@@ -128,8 +183,34 @@ console.log('Hello, world!')
     `)
   })
 
-  test('transforms HTML absolute internal links in multilingual projects', async () => {
-    const result = await transformTestMarkdown(`<a href="/fr/test/">Test</a>`, { locale: 'fr' })
+  test('transforms HTML absolute internal links (.md)', async () => {
+    const result = await transformTestMarkdown(
+      `See <a href="https://example.com/">Test 1</a>, <a href="/test/">Test 2</a>, <a href="./test/">Test 3</a> and <a href="../test/">Test 4</a>.
+
+<div>
+  <a href="/test/">Test 5</a>
+  <a class="link" href='/test/'>Test 6</a>
+</div>
+
+<p><a href="/test/">Test 7<p>Test 8</a>`,
+      { extension: 'md' },
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "See <a href="https://example.com/">Test 1</a>, <a href="/2.0/test/">Test 2</a>, <a href="./test/">Test 3</a> and <a href="../test/">Test 4</a>.
+
+      <div>
+        <a href="/2.0/test/">Test 5</a>
+        <a class="link" href='/2.0/test/'>Test 6</a>
+      </div>
+
+      <p><a href="/2.0/test/">Test 7<p>Test 8</a>
+      "
+    `)
+  })
+
+  test.for(extensions)('transforms HTML absolute internal links in multilingual projects (.%s)', async (extension) => {
+    const result = await transformTestMarkdown(`<a href="/fr/test/">Test</a>`, { extension, locale: 'fr' })
 
     expect(result.content).toMatchInlineSnapshot(`
       "<a href="/fr/2.0/test/">Test</a>
@@ -145,10 +226,13 @@ console.log('Hello, world!')
     expectVersionAssetsToHaveLength(result.assets, 0)
   })
 
-  test('transforms and copies Markdown images', async () => {
-    const result = await transformTestMarkdown(`![Test 1](https://example.com/test.png)
+  test.for(extensions)('transforms and copies Markdown images (.%s)', async (extension) => {
+    const result = await transformTestMarkdown(
+      `![Test 1](https://example.com/test.png)
 ![Test 2](/test.png)
-![Test 3](../../assets/test.png)`)
+![Test 3](../../assets/test.png)`,
+      { extension },
+    )
 
     expect(result.content).toMatchInlineSnapshot(`
       "![Test 1](https://example.com/test.png)
@@ -341,9 +425,55 @@ import exampleConfig from "../../assets/example-config.json?raw";
     expectVersionAssetToMatch(result.assets?.[1], /\/test5\.mp4$/, /\/2\.0\/test5\.mp4$/)
     expectVersionAssetToMatch(result.assets?.[2], /\/test6\.webm$/, /\/2\.0\/test6\.webm$/)
   })
+
+  test('transforms HTML media elements (.md)', async () => {
+    const result = await transformTestMarkdown(
+      `<img src="https://example.com/test1.png" alt="Test 1">
+<img src="/test2.png" alt="Test 2">
+
+<picture>
+  <source srcset="/test3.png" media="(orientation: portrait)">
+  <img src="/test4.png" alt="Test 4">
+</picture>
+
+<audio src="/test5.mp3"></audio>
+
+<video controls>
+  <source src="https://example.com/test6.mp4" type="video/mp4">
+  <source src="/test7.webm" type="video/webm">
+</video>`,
+      { extension: 'md' },
+    )
+
+    expect(result.content).toMatchInlineSnapshot(`
+      "<img src="https://example.com/test1.png" alt="Test 1">
+      <img src="/2.0/test2.png" alt="Test 2">
+
+      <picture>
+        <source srcset="/2.0/test3.png" media="(orientation: portrait)">
+        <img src="/2.0/test4.png" alt="Test 4">
+      </picture>
+
+      <audio src="/2.0/test5.mp3"></audio>
+
+      <video controls>
+        <source src="https://example.com/test6.mp4" type="video/mp4">
+        <source src="/2.0/test7.webm" type="video/webm">
+      </video>
+      "
+    `)
+
+    expectVersionAssetsToHaveLength(result.assets, 5)
+
+    expectVersionAssetToMatch(result.assets?.[0], /\/test2\.png$/, /\/2\.0\/test2\.png$/)
+    expectVersionAssetToMatch(result.assets?.[1], /\/test3\.png$/, /\/2\.0\/test3\.png$/)
+    expectVersionAssetToMatch(result.assets?.[2], /\/test4\.png$/, /\/2\.0\/test4\.png$/)
+    expectVersionAssetToMatch(result.assets?.[3], /\/test5\.mp3$/, /\/2\.0\/test5\.mp3$/)
+    expectVersionAssetToMatch(result.assets?.[4], /\/test7\.webm$/, /\/2\.0\/test7\.webm$/)
+  })
 })
 
-async function transformTestMarkdown(markdown: string, context: TransformTestContext = {}) {
+async function transformTestMarkdown(markdown: string, { extension = 'mdx', ...context }: TransformTestContext = {}) {
   const result = await transformMarkdown(markdown, {
     assets: [],
     base: '',
@@ -352,7 +482,7 @@ async function transformTestMarkdown(markdown: string, context: TransformTestCon
     locale: undefined,
     publicDir: new URL(import.meta.url),
     slug: 'test',
-    url: new URL('src/content/docs/test.md', import.meta.url),
+    url: new URL(`src/content/docs/test.${extension}`, import.meta.url),
     version: {
       slug: '2.0',
       redirect: 'same-page',
@@ -366,4 +496,4 @@ async function transformTestMarkdown(markdown: string, context: TransformTestCon
   }
 }
 
-type TransformTestContext = Partial<Parameters<typeof transformMarkdown>[1]>
+type TransformTestContext = Partial<Parameters<typeof transformMarkdown>[1]> & { extension?: 'md' | 'mdx' }
