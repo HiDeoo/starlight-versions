@@ -668,6 +668,28 @@ An inline <img src="/test8.png" alt="Test 8"> image.`,
         expectVersionAssetToMatch(result.assets?.[5], /\/test4@2x\.png$/, /\/2\.0\/test4@2x\.png$/)
       },
     )
+
+    test.for(extensions)('transforms and copies inline HTML media elements (.%s)', async (extension) => {
+      const result = await transformTestMarkdown(
+        `An inline <img src="/test1.png" alt="Test 1" /> image.
+
+An inline <img srcset="/test2.png 1x, /test2@2x.png 2x" alt="Test 2" /> image.`,
+        { extension },
+      )
+
+      expect(result.content).toMatchInlineSnapshot(`
+        "An inline <img src="/2.0/test1.png" alt="Test 1" /> image.
+
+        An inline <img srcset="/2.0/test2.png 1x, /2.0/test2@2x.png 2x" alt="Test 2" /> image.
+        "
+      `)
+
+      expectVersionAssetsToHaveLength(result.assets, 3)
+
+      expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+      expectVersionAssetToMatch(result.assets?.[1], /\/test2\.png$/, /\/2\.0\/test2\.png$/)
+      expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
+    })
   })
 })
 

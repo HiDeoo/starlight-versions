@@ -54,17 +54,11 @@ export function remarkStarlightVersions() {
         case 'link': {
           return handleLinks(node, file)
         }
-        case 'mdxJsxTextElement': {
-          if (node.name === 'a') {
-            return handleLinkElements(node, file)
-          }
-
-          return CONTINUE
-        }
         case 'mdxjsEsm': {
           return handleImports(node, file)
         }
-        case 'mdxJsxFlowElement': {
+        case 'mdxJsxFlowElement':
+        case 'mdxJsxTextElement': {
           if (node.name === 'a') {
             return handleLinkElements(node, file)
           }
@@ -205,7 +199,7 @@ function handleImages(node: Image, file: VFile) {
   return SKIP
 }
 
-function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
+function handleMediaElements(node: MdxJsxFlowElement | MdxJsxTextElement, file: VFile) {
   for (const attribute of node.attributes) {
     if (attribute.type !== 'mdxJsxAttribute' || typeof attribute.value !== 'string') continue
 
