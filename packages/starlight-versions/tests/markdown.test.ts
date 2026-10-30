@@ -326,6 +326,34 @@ console.log('Hello, world!')
       expectVersionAssetsToHaveLength(result.assets, 0)
     })
 
+    test.for(extensions)('does not transform Markdown images using import aliases (.%s)', async (extension) => {
+      const markdown = `![Test 1](@assets/test1.png)
+![Test 2](~/assets/test2.png)`
+
+      const result = await transformTestMarkdown(markdown, { extension })
+
+      expect(result.content.trim()).toBe(markdown)
+
+      expectVersionAssetsToHaveLength(result.assets, 0)
+    })
+
+    test('does not transform import paths using import aliases in MDX files', async () => {
+      const markdown = `import { Image } from 'astro:assets'
+import test1 from '@assets/test1.png'
+import test2 from '~/assets/test2.png'
+import exampleConfig from '@assets/example-config.json?raw'
+
+<Image src={test1} alt="Test 1" />
+
+<img src={test2.src} alt="Test 2" />`
+
+      const result = await transformTestMarkdown(markdown, { extension: 'mdx' })
+
+      expect(result.content.trim()).toBe(markdown)
+
+      expectVersionAssetsToHaveLength(result.assets, 0)
+    })
+
     test.for(extensions)('transforms and copies Markdown images (.%s)', async (extension) => {
       const result = await transformTestMarkdown(
         `![Test 1](https://example.com/test.png)
