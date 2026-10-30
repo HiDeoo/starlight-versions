@@ -632,6 +632,42 @@ An inline <img src="/test8.png" alt="Test 8"> image.`,
       expectVersionAssetToMatch(result.assets?.[7], /\/test5@2x\.png$/, /\/2\.0\/test5@2x\.png$/)
       expectVersionAssetToMatch(result.assets?.[8], /\/test6@2x\.png$/, /\/2\.0\/test6@2x\.png$/)
     })
+
+    test.for(extensions)(
+      'transforms and copies public assets in src and srcset attributes (.%s)',
+      async (extension) => {
+        const result = await transformTestMarkdown(
+          `<img src="/test1.png" srcset="/test1@2x.png 2x" alt="Test 1" />
+
+<img srcset="/test2@2x.png 2x" src="https://example.com/test2.png" alt="Test 2" />
+
+<img src="https://example.com/test3.png" srcset="/test3@2x.png 2x" alt="Test 3" />
+
+<img srcSet="/test4.png 1x, /test4@2x.png 2x" alt="Test 4" />`,
+          { extension },
+        )
+
+        expect(result.content).toMatchInlineSnapshot(`
+          "<img src="/2.0/test1.png" srcset="/2.0/test1@2x.png 2x" alt="Test 1" />
+
+          <img srcset="/2.0/test2@2x.png 2x" src="https://example.com/test2.png" alt="Test 2" />
+
+          <img src="https://example.com/test3.png" srcset="/2.0/test3@2x.png 2x" alt="Test 3" />
+
+          <img srcSet="/2.0/test4.png 1x, /2.0/test4@2x.png 2x" alt="Test 4" />
+          "
+        `)
+
+        expectVersionAssetsToHaveLength(result.assets, 6)
+
+        expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+        expectVersionAssetToMatch(result.assets?.[1], /\/test1@2x\.png$/, /\/2\.0\/test1@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[3], /\/test3@2x\.png$/, /\/2\.0\/test3@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[4], /\/test4\.png$/, /\/2\.0\/test4\.png$/)
+        expectVersionAssetToMatch(result.assets?.[5], /\/test4@2x\.png$/, /\/2\.0\/test4@2x\.png$/)
+      },
+    )
   })
 })
 
