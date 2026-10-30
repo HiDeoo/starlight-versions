@@ -26,6 +26,7 @@ import type { Version, VersionAsset } from './versions'
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif|.+\?raw)$/i
 const htmlAttributeRegex = /^(?<prefix>[^=]+=\s*(?<quote>["']?))(?<value>.*)\k<quote>$/s
+const srcsetUrlRegex = /(?<=(?:^|,)\s*)[^\s,]\S*?(?=,*(?:\s|$))/g
 
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
@@ -53,17 +54,11 @@ export function remarkStarlightVersions() {
         case 'link': {
           return handleLinks(node, file)
         }
-        case 'mdxJsxTextElement': {
-          if (node.name === 'a') {
-            return handleLinkElements(node, file)
-          }
-
-          return CONTINUE
-        }
         case 'mdxjsEsm': {
           return handleImports(node, file)
         }
-        case 'mdxJsxFlowElement': {
+        case 'mdxJsxFlowElement':
+        case 'mdxJsxTextElement': {
           if (node.name === 'a') {
             return handleLinkElements(node, file)
           }
@@ -154,7 +149,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
 function handleLinks(node: Link, file: VFile) {
   node.url = transformLink(node.url, file)
 
-  return SKIP
+  return CONTINUE
 }
 
 function handleLinkElements(node: MdxJsxFlowElement | MdxJsxTextElement, file: VFile) {
@@ -204,16 +199,18 @@ function handleImages(node: Image, file: VFile) {
   return SKIP
 }
 
-function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
-  const srcOrSrcset = node.attributes.find(
-    (attribute) => attribute.type === 'mdxJsxAttribute' && (attribute.name === 'src' || attribute.name === 'srcset'),
-  )
+function handleMediaElements(node: MdxJsxFlowElement | MdxJsxTextElement, file: VFile) {
+  for (const attribute of node.attributes) {
+    if (attribute.type !== 'mdxJsxAttribute' || typeof attribute.value !== 'string') continue
 
-  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string' || !isPublicAsset(srcOrSrcset.value)) return CONTINUE
+    if (attribute.name === 'src' && isPublicAsset(attribute.value)) {
+      attribute.value = addVersionToPublicAsset(attribute.value, file)
+    } else if (attribute.name === 'srcset' || attribute.name === 'srcSet') {
+      attribute.value = addVersionToPublicSrcset(attribute.value, file)
+    }
+  }
 
-  srcOrSrcset.value = addVersionToPublicAsset(srcOrSrcset.value, file)
-
-  return SKIP
+  return CONTINUE
 }
 
 // Raw HTML nodes only exist in non-MDX files (MDX parses HTML as JSX) and are not re-serialized to preserve them as
@@ -231,11 +228,17 @@ function handleHtml(node: Html, file: VFile) {
 
       updates.set(href.start, { ...href, value: transformLink(href.value, file) })
     } else if (mediaElements.has(element.tagName)) {
-      const srcOrSrcset =
-        getHtmlAttribute(node.value, element, 'src') ?? getHtmlAttribute(node.value, element, 'srcSet')
-      if (!srcOrSrcset || updates.has(srcOrSrcset.start) || !isPublicAsset(srcOrSrcset.value)) return
+      const src = getHtmlAttribute(node.value, element, 'src')
 
-      updates.set(srcOrSrcset.start, { ...srcOrSrcset, value: addVersionToPublicAsset(srcOrSrcset.value, file) })
+      if (src && !updates.has(src.start) && isPublicAsset(src.value)) {
+        updates.set(src.start, { ...src, value: addVersionToPublicAsset(src.value, file) })
+      }
+
+      const srcset = getHtmlAttribute(node.value, element, 'srcSet')
+
+      if (srcset && !updates.has(srcset.start)) {
+        updates.set(srcset.start, { ...srcset, value: addVersionToPublicSrcset(srcset.value, file) })
+      }
     }
   })
 
@@ -329,6 +332,10 @@ function addVersionToPublicAsset(asset: string, file: VFile) {
   addVersionAsset(file, { source, dest: new URL(`.${segments.join('/')}`, file.data.publicDir) })
 
   return segments.join('/')
+}
+
+function addVersionToPublicSrcset(srcset: string, file: VFile) {
+  return srcset.replaceAll(srcsetUrlRegex, (url) => (isPublicAsset(url) ? addVersionToPublicAsset(url, file) : url))
 }
 
 function addVersionAsset(file: VFile, asset: VersionAsset) {

@@ -588,6 +588,134 @@ An inline <img src="/test8.png" alt="Test 8"> image.`,
       expectVersionAssetToMatch(result.assets?.[4], /\/test7\.webm$/, /\/2\.0\/test7\.webm$/)
       expectVersionAssetToMatch(result.assets?.[5], /\/test8\.png$/, /\/2\.0\/test8\.png$/)
     })
+
+    test.for(extensions)('transforms and copies public assets in srcset attributes (.%s)', async (extension) => {
+      const result = await transformTestMarkdown(
+        `<img srcset="/test1.png" alt="Test 1" />
+
+<img srcset="/test2.png 1x, /test2@2x.png 2x" alt="Test 2" />
+
+<img srcset="/test3.png 480w,/test3-large.png 800w" alt="Test 3" />
+
+<img srcset="/test4.png, /test4@2x.png 2x" alt="Test 4" />
+
+<img srcset="https://example.com/test5.png 1x, /test5@2x.png 2x" alt="Test 5" />
+
+<img srcset="data:image/png;base64,abc= 1x, /test6@2x.png 2x" alt="Test 6" />`,
+        { extension },
+      )
+
+      expect(result.content).toMatchInlineSnapshot(`
+        "<img srcset="/2.0/test1.png" alt="Test 1" />
+
+        <img srcset="/2.0/test2.png 1x, /2.0/test2@2x.png 2x" alt="Test 2" />
+
+        <img srcset="/2.0/test3.png 480w,/2.0/test3-large.png 800w" alt="Test 3" />
+
+        <img srcset="/2.0/test4.png, /2.0/test4@2x.png 2x" alt="Test 4" />
+
+        <img srcset="https://example.com/test5.png 1x, /2.0/test5@2x.png 2x" alt="Test 5" />
+
+        <img srcset="data:image/png;base64,abc= 1x, /2.0/test6@2x.png 2x" alt="Test 6" />
+        "
+      `)
+
+      expectVersionAssetsToHaveLength(result.assets, 9)
+
+      expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+      expectVersionAssetToMatch(result.assets?.[1], /\/test2\.png$/, /\/2\.0\/test2\.png$/)
+      expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
+      expectVersionAssetToMatch(result.assets?.[3], /\/test3\.png$/, /\/2\.0\/test3\.png$/)
+      expectVersionAssetToMatch(result.assets?.[4], /\/test3-large\.png$/, /\/2\.0\/test3-large\.png$/)
+      expectVersionAssetToMatch(result.assets?.[5], /\/test4\.png$/, /\/2\.0\/test4\.png$/)
+      expectVersionAssetToMatch(result.assets?.[6], /\/test4@2x\.png$/, /\/2\.0\/test4@2x\.png$/)
+      expectVersionAssetToMatch(result.assets?.[7], /\/test5@2x\.png$/, /\/2\.0\/test5@2x\.png$/)
+      expectVersionAssetToMatch(result.assets?.[8], /\/test6@2x\.png$/, /\/2\.0\/test6@2x\.png$/)
+    })
+
+    test.for(extensions)(
+      'transforms and copies public assets in src and srcset attributes (.%s)',
+      async (extension) => {
+        const result = await transformTestMarkdown(
+          `<img src="/test1.png" srcset="/test1@2x.png 2x" alt="Test 1" />
+
+<img srcset="/test2@2x.png 2x" src="https://example.com/test2.png" alt="Test 2" />
+
+<img src="https://example.com/test3.png" srcset="/test3@2x.png 2x" alt="Test 3" />
+
+<img srcSet="/test4.png 1x, /test4@2x.png 2x" alt="Test 4" />`,
+          { extension },
+        )
+
+        expect(result.content).toMatchInlineSnapshot(`
+          "<img src="/2.0/test1.png" srcset="/2.0/test1@2x.png 2x" alt="Test 1" />
+
+          <img srcset="/2.0/test2@2x.png 2x" src="https://example.com/test2.png" alt="Test 2" />
+
+          <img src="https://example.com/test3.png" srcset="/2.0/test3@2x.png 2x" alt="Test 3" />
+
+          <img srcSet="/2.0/test4.png 1x, /2.0/test4@2x.png 2x" alt="Test 4" />
+          "
+        `)
+
+        expectVersionAssetsToHaveLength(result.assets, 6)
+
+        expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+        expectVersionAssetToMatch(result.assets?.[1], /\/test1@2x\.png$/, /\/2\.0\/test1@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[3], /\/test3@2x\.png$/, /\/2\.0\/test3@2x\.png$/)
+        expectVersionAssetToMatch(result.assets?.[4], /\/test4\.png$/, /\/2\.0\/test4\.png$/)
+        expectVersionAssetToMatch(result.assets?.[5], /\/test4@2x\.png$/, /\/2\.0\/test4@2x\.png$/)
+      },
+    )
+
+    test.for(extensions)('transforms and copies inline HTML media elements (.%s)', async (extension) => {
+      const result = await transformTestMarkdown(
+        `An inline <img src="/test1.png" alt="Test 1" /> image.
+
+An inline <img srcset="/test2.png 1x, /test2@2x.png 2x" alt="Test 2" /> image.`,
+        { extension },
+      )
+
+      expect(result.content).toMatchInlineSnapshot(`
+        "An inline <img src="/2.0/test1.png" alt="Test 1" /> image.
+
+        An inline <img srcset="/2.0/test2.png 1x, /2.0/test2@2x.png 2x" alt="Test 2" /> image.
+        "
+      `)
+
+      expectVersionAssetsToHaveLength(result.assets, 3)
+
+      expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+      expectVersionAssetToMatch(result.assets?.[1], /\/test2\.png$/, /\/2\.0\/test2\.png$/)
+      expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
+    })
+
+    test.for(extensions)('transforms and copies images in links (.%s)', async (extension) => {
+      const result = await transformTestMarkdown(
+        `[![Test 1](/test1.png)](/test/)
+
+[![Test 2](../../assets/test2.png)](/test/)
+
+[<img src="/test3.png" alt="Test 3" />](/test/)`,
+        { extension },
+      )
+
+      expect(result.content).toMatchInlineSnapshot(`
+        "[![Test 1](/2.0/test1.png)](/2.0/test/)
+
+        [![Test 2](../../../assets/2.0/test2.png)](/2.0/test/)
+
+        [<img src="/2.0/test3.png" alt="Test 3" />](/2.0/test/)
+        "
+      `)
+
+      expectVersionAssetsToHaveLength(result.assets, 3)
+
+      expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+      expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test2\.png$/, /\/src\/assets\/2\.0\/test2\.png$/)
+      expectVersionAssetToMatch(result.assets?.[2], /\/test3\.png$/, /\/2\.0\/test3\.png$/)
+    })
   })
 })
 
