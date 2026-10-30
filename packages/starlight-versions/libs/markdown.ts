@@ -216,10 +216,12 @@ function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
   return SKIP
 }
 
-// Raw HTML (only available in Markdown files) is not re-serialized, only the transformed attribute values are updated.
+// Raw HTML nodes only exist in non-MDX files (MDX parses HTML as JSX) and are not re-serialized to preserve them as
+// authored, e.g. unclosed inline tags, and only the transformed attribute values are updated.
 function handleHtml(node: Html, file: VFile) {
   const tree = fromHtml(node.value, { fragment: true, verbose: true })
-  // Updates are indexed by offset as misnested HTML can lead to the same attribute being visited multiple times.
+  // Updates are keyed by attribute offset as misnested HTML can lead the parser to recreate elements which share the
+  // source position of the original element and would be updated multiple times.
   const updates = new Map<number, HtmlAttribute>()
 
   visit(tree, 'element', (element) => {
