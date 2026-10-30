@@ -149,7 +149,7 @@ function handleFrontmatter(tree: Root, file: VFile) {
 function handleLinks(node: Link, file: VFile) {
   node.url = transformLink(node.url, file)
 
-  return SKIP
+  return CONTINUE
 }
 
 function handleLinkElements(node: MdxJsxFlowElement | MdxJsxTextElement, file: VFile) {

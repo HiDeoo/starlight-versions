@@ -690,6 +690,32 @@ An inline <img srcset="/test2.png 1x, /test2@2x.png 2x" alt="Test 2" /> image.`,
       expectVersionAssetToMatch(result.assets?.[1], /\/test2\.png$/, /\/2\.0\/test2\.png$/)
       expectVersionAssetToMatch(result.assets?.[2], /\/test2@2x\.png$/, /\/2\.0\/test2@2x\.png$/)
     })
+
+    test.for(extensions)('transforms and copies images in links (.%s)', async (extension) => {
+      const result = await transformTestMarkdown(
+        `[![Test 1](/test1.png)](/test/)
+
+[![Test 2](../../assets/test2.png)](/test/)
+
+[<img src="/test3.png" alt="Test 3" />](/test/)`,
+        { extension },
+      )
+
+      expect(result.content).toMatchInlineSnapshot(`
+        "[![Test 1](/2.0/test1.png)](/2.0/test/)
+
+        [![Test 2](../../../assets/2.0/test2.png)](/2.0/test/)
+
+        [<img src="/2.0/test3.png" alt="Test 3" />](/2.0/test/)
+        "
+      `)
+
+      expectVersionAssetsToHaveLength(result.assets, 3)
+
+      expectVersionAssetToMatch(result.assets?.[0], /\/test1\.png$/, /\/2\.0\/test1\.png$/)
+      expectVersionAssetToMatch(result.assets?.[1], /\/src\/assets\/test2\.png$/, /\/src\/assets\/2\.0\/test2\.png$/)
+      expectVersionAssetToMatch(result.assets?.[2], /\/test3\.png$/, /\/2\.0\/test3\.png$/)
+    })
   })
 })
 
