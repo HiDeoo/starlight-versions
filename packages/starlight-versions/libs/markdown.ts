@@ -1,6 +1,8 @@
 import assert from 'node:assert'
 
-import type { Image, Link, Root } from 'mdast'
+import type { Element } from 'hast'
+import { fromHtml } from 'hast-util-from-html'
+import type { Html, Image, Link, Root } from 'mdast'
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx'
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm'
 import { remark } from 'remark'
@@ -12,6 +14,7 @@ import type { VFile } from 'vfile'
 
 import {
   ensureTrailingSlash,
+  getExtension,
   isAbsoluteLink,
   stripLeadingAndTrailingSlashes,
   stripLeadingSlash,
@@ -22,12 +25,16 @@ import type { Version, VersionAsset } from './versions'
 
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif|.+\?raw)$/i
+const htmlAttributeRegex = /^(?<prefix>[^=]+=\s*(?<quote>["']?))(?<value>.*)\k<quote>$/s
 
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
-const processor = remark().use(remarkDirective).use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
+const markdownProcessor = remark().use(remarkDirective).use(remarkFrontmatter).use(remarkStarlightVersions)
+const mdxProcessor = markdownProcessor().use(remarkMdx)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
+  const processor = getExtension(context.url.pathname) === '.mdx' ? mdxProcessor : markdownProcessor
+
   const file = await processor.process({
     data: { ...context },
     value: markdown,
@@ -69,6 +76,9 @@ export function remarkStarlightVersions() {
         }
         case 'image': {
           return handleImages(node, file)
+        }
+        case 'html': {
+          return handleHtml(node, file)
         }
         default: {
           return CONTINUE
@@ -206,6 +216,54 @@ function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
   return SKIP
 }
 
+// Raw HTML nodes only exist in non-MDX files (MDX parses HTML as JSX) and are not re-serialized to preserve them as
+// authored, e.g. unclosed inline tags, and only the transformed attribute values are updated.
+function handleHtml(node: Html, file: VFile) {
+  const tree = fromHtml(node.value, { fragment: true, verbose: true })
+  // Updates are keyed by attribute offset as misnested HTML can lead the parser to recreate elements which share the
+  // source position of the original element and would be updated multiple times.
+  const updates = new Map<number, HtmlAttribute>()
+
+  visit(tree, 'element', (element) => {
+    if (element.tagName === 'a') {
+      const href = getHtmlAttribute(node.value, element, 'href')
+      if (!href || updates.has(href.start)) return
+
+      updates.set(href.start, { ...href, value: transformLink(href.value, file) })
+    } else if (mediaElements.has(element.tagName)) {
+      const srcOrSrcset =
+        getHtmlAttribute(node.value, element, 'src') ?? getHtmlAttribute(node.value, element, 'srcSet')
+      if (!srcOrSrcset || updates.has(srcOrSrcset.start) || !isPublicAsset(srcOrSrcset.value)) return
+
+      updates.set(srcOrSrcset.start, { ...srcOrSrcset, value: addVersionToPublicAsset(srcOrSrcset.value, file) })
+    }
+  })
+
+  // Update attributes from the end to keep the offsets of the previous ones valid.
+  const sortedUpdates = updates
+    .values()
+    .toArray()
+    .toSorted((a, b) => b.start - a.start)
+
+  for (const { end, start, value } of sortedUpdates) {
+    node.value = `${node.value.slice(0, start)}${value}${node.value.slice(end)}`
+  }
+
+  return SKIP
+}
+
+function getHtmlAttribute(html: string, element: Element, property: string): HtmlAttribute | undefined {
+  const position = element.data?.position.properties?.[property]
+  if (position?.start.offset === undefined || position.end.offset === undefined) return
+
+  const match = htmlAttributeRegex.exec(html.slice(position.start.offset, position.end.offset))
+  if (!match?.groups?.['prefix'] || !match.groups['value']) return
+
+  const start = position.start.offset + match.groups['prefix'].length
+
+  return { end: start + match.groups['value'].length, start, value: match.groups['value'] }
+}
+
 function handleImports(node: MdxjsEsm, file: VFile) {
   node.value = node.value.replaceAll(importPathRegex, (match, start, importPath: string, end) => {
     if (!importPath.startsWith('../')) return match
@@ -295,6 +353,12 @@ export interface TransformContext {
   slug: string
   url: URL
   version: Version
+}
+
+interface HtmlAttribute {
+  end: number
+  start: number
+  value: string
 }
 
 declare module 'vfile' {

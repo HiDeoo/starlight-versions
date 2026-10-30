@@ -5,7 +5,7 @@ import { transformMarkdown, type TransformContext } from '../libs/markdown'
 import { expectVersionAssetToMatch, expectVersionAssetsToHaveLength } from './utils'
 
 describe('transformMarkdown', () => {
-  test('adds versioned slug and preserves existing frontmatter', async () => {
+  test.for(['md', 'mdx'])('adds versioned slug and preserves existing frontmatter (.%s)', async (extension) => {
     const result = await transformMarkdown(
       `---
 title: Test
@@ -15,7 +15,7 @@ head:
 ---
 
 Test`,
-      getTestContext(),
+      getTestContext(extension),
     )
 
     expect(result.content).toMatchInlineSnapshot(`
@@ -276,7 +276,7 @@ Test`,
   })
 })
 
-function getTestContext(): TransformContext {
+function getTestContext(extension = 'md'): TransformContext {
   return {
     assets: [],
     base: '',
@@ -285,7 +285,7 @@ function getTestContext(): TransformContext {
     publicDir: new URL(import.meta.url),
     slug: 'test',
     excludedSlugs: [],
-    url: new URL('src/content/docs/test.md', import.meta.url),
+    url: new URL(`src/content/docs/test.${extension}`, import.meta.url),
     version: {
       slug: '2.0.1',
       redirect: 'same-page',
