@@ -30,7 +30,7 @@ const htmlAttributeRegex = /^(?<prefix>[^=]+=\s*(?<quote>["']?))(?<value>.*)\k<q
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
 const markdownProcessor = remark().use(remarkDirective).use(remarkFrontmatter).use(remarkStarlightVersions)
-const mdxProcessor = remark().use(remarkDirective).use(remarkMdx).use(remarkFrontmatter).use(remarkStarlightVersions)
+const mdxProcessor = markdownProcessor().use(remarkMdx)
 
 export async function transformMarkdown(markdown: string, context: TransformContext) {
   const processor = getExtension(context.url.pathname) === '.mdx' ? mdxProcessor : markdownProcessor

@@ -90,6 +90,8 @@ This is a note
 This is a tip with a custom title
 :::
 
+Some :abbr[HTML]{title="HyperText Markup Language"} text.
+
 \`\`\`js title=src/index.js
 console.log('Hello, world!')
 \`\`\``,
@@ -104,6 +106,8 @@ console.log('Hello, world!')
         :::tip[Custom Title]
         This is a tip with a custom title
         :::
+
+        Some :abbr[HTML]{title="HyperText Markup Language"} text.
 
         \`\`\`js title=src/index.js
         console.log('Hello, world!')
