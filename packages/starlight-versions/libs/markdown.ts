@@ -3,7 +3,7 @@ import assert from 'node:assert'
 import type { Element } from 'hast'
 import { fromHtml } from 'hast-util-from-html'
 import type { Html, Image, Link, Root } from 'mdast'
-import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx'
+import type { MdxJsxAttribute, MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx'
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm'
 import { remark } from 'remark'
 import remarkDirective from 'remark-directive'
@@ -26,6 +26,7 @@ import type { Version, VersionAsset } from './versions'
 const importPathRegex = /(from ?["'])([^"']*)(["'];?\s?)$/gm
 const astroAssetRegex = /\.(png|jpg|jpeg|tiff|webp|gif|svg|avif|.+\?raw)$/i
 const htmlAttributeRegex = /^(?<prefix>[^=]+=\s*(?<quote>["']?))(?<value>.*)\k<quote>$/s
+const srcsetUrlRegex = /(?<=(?:^|,)\s*)[^\s,]\S*?(?=,*(?:\s|$))/g
 
 const mediaElements = new Set(['img', 'source', 'Image', 'audio', 'video'])
 
@@ -206,10 +207,19 @@ function handleImages(node: Image, file: VFile) {
 
 function handleMediaElements(node: MdxJsxFlowElement, file: VFile) {
   const srcOrSrcset = node.attributes.find(
-    (attribute) => attribute.type === 'mdxJsxAttribute' && (attribute.name === 'src' || attribute.name === 'srcset'),
+    (attribute): attribute is MdxJsxAttribute =>
+      attribute.type === 'mdxJsxAttribute' && (attribute.name === 'src' || attribute.name === 'srcset'),
   )
 
-  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string' || !isPublicAsset(srcOrSrcset.value)) return CONTINUE
+  if (!srcOrSrcset || typeof srcOrSrcset.value !== 'string') return CONTINUE
+
+  if (srcOrSrcset.name === 'srcset') {
+    srcOrSrcset.value = addVersionToPublicSrcset(srcOrSrcset.value, file)
+
+    return SKIP
+  }
+
+  if (!isPublicAsset(srcOrSrcset.value)) return CONTINUE
 
   srcOrSrcset.value = addVersionToPublicAsset(srcOrSrcset.value, file)
 
@@ -231,11 +241,16 @@ function handleHtml(node: Html, file: VFile) {
 
       updates.set(href.start, { ...href, value: transformLink(href.value, file) })
     } else if (mediaElements.has(element.tagName)) {
-      const srcOrSrcset =
-        getHtmlAttribute(node.value, element, 'src') ?? getHtmlAttribute(node.value, element, 'srcSet')
-      if (!srcOrSrcset || updates.has(srcOrSrcset.start) || !isPublicAsset(srcOrSrcset.value)) return
+      const src = getHtmlAttribute(node.value, element, 'src')
+      const srcset = getHtmlAttribute(node.value, element, 'srcSet')
 
-      updates.set(srcOrSrcset.start, { ...srcOrSrcset, value: addVersionToPublicAsset(srcOrSrcset.value, file) })
+      if (src) {
+        if (updates.has(src.start) || !isPublicAsset(src.value)) return
+
+        updates.set(src.start, { ...src, value: addVersionToPublicAsset(src.value, file) })
+      } else if (srcset && !updates.has(srcset.start)) {
+        updates.set(srcset.start, { ...srcset, value: addVersionToPublicSrcset(srcset.value, file) })
+      }
     }
   })
 
@@ -329,6 +344,10 @@ function addVersionToPublicAsset(asset: string, file: VFile) {
   addVersionAsset(file, { source, dest: new URL(`.${segments.join('/')}`, file.data.publicDir) })
 
   return segments.join('/')
+}
+
+function addVersionToPublicSrcset(srcset: string, file: VFile) {
+  return srcset.replaceAll(srcsetUrlRegex, (url) => (isPublicAsset(url) ? addVersionToPublicAsset(url, file) : url))
 }
 
 function addVersionAsset(file: VFile, asset: VersionAsset) {
