@@ -1,5 +1,19 @@
 # starlight-versions
 
+## 0.10.2
+
+### Patch Changes
+
+- [#86](https://github.com/HiDeoo/starlight-versions/pull/86) [`27959fb`](https://github.com/HiDeoo/starlight-versions/commit/27959fb72e19fbad44a79fe673a2246ab64ad05a) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes versioning of public assets in media elements using both `src` and `srcset` attributes.
+
+- [#84](https://github.com/HiDeoo/starlight-versions/pull/84) [`7cc6fdf`](https://github.com/HiDeoo/starlight-versions/commit/7cc6fdfe49f66df7a77b1f1b18891ebe50a37b1e) Thanks [@dgesteves](https://github.com/dgesteves)! - Fixes versioning of Markdown files using syntax that is not valid in MDX, like `<->` arrows.
+
+- [#86](https://github.com/HiDeoo/starlight-versions/pull/86) [`27959fb`](https://github.com/HiDeoo/starlight-versions/commit/27959fb72e19fbad44a79fe673a2246ab64ad05a) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes versioning of public assets in `srcset` attributes with multiple images or descriptors.
+
+- [#86](https://github.com/HiDeoo/starlight-versions/pull/86) [`27959fb`](https://github.com/HiDeoo/starlight-versions/commit/27959fb72e19fbad44a79fe673a2246ab64ad05a) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes versioning of images inside links.
+
+- [#86](https://github.com/HiDeoo/starlight-versions/pull/86) [`27959fb`](https://github.com/HiDeoo/starlight-versions/commit/27959fb72e19fbad44a79fe673a2246ab64ad05a) Thanks [@HiDeoo](https://github.com/HiDeoo)! - Fixes versioning of public assets in inline media elements in MDX files.
+
 ## 0.10.1
 
 ### Patch Changes
